@@ -11,12 +11,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-   
     "express": "^5.1.0",
     "mongoose": "^8.20.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-     "@types/express": "^5.0.5"
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "jsonwebtoken": "^9.0.2",
+    "typescript": "^5.9.3"
   }
 }
