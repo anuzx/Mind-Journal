@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const contentType = ["image", "video", "article", "audio" , "text"];
+const contentType = ["image", "video", "article", "audio", "text"];
 
 const contentSchema = new Schema(
   {
@@ -17,6 +17,10 @@ const contentSchema = new Schema(
       type: String,
       required: true,
     },
+    description: {
+      type: String,
+      require: true
+    },
     tags: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tag",
@@ -30,4 +34,4 @@ const contentSchema = new Schema(
   { timestamps: true }
 );
 
-export const Content = mongoose.model("Content", contentSchema);
+export const ContentModel = mongoose.model("Content", contentSchema);

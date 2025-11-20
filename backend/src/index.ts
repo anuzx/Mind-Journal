@@ -10,5 +10,5 @@ connectDB() //it is an async method , and whenever async method is completed a p
     );
   })
   .catch((err) => {
-    console.log("MONGODB connection dailed !!! ", err);
+    console.log("MONGODB connection failed !!! ", err);
   });
