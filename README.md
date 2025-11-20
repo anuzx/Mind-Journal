@@ -1,4 +1,3 @@
 # Mind Journal
 
-schema
-![alt text](image.png)
+Store your thoughts and important stuff with style

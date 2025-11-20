@@ -22,9 +22,11 @@ const contentSchema = new Schema(
       require: true
     },
     tags: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Tag",
-    },
+  type: [mongoose.Schema.Types.ObjectId],
+  ref: "Tag",
+  default: []
+},
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

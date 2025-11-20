@@ -67,22 +67,38 @@ const signIn = async (req: Request, res: Response) => {
 
 
 const postContent = async (req: Request, res: Response) => {
-    const { link, type } = req.body;
-   await ContentModel.create({
-        link, 
-        type,
-        //@ts-expect-error
-        userid: req.userId,
-        tags: []
-    })
-    res.json({
-        message: "content added"
-    })
-    
-}
+  try {
+    const { link, type, title, description, tags } = req.body;
+
+    if (!title) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    if (!description) {
+      return res.status(400).json({ message: "Description is required" });
+    }
+
+    const content = await ContentModel.create({
+      link,
+      type,
+      title,
+      description,
+      userId: req.userId,
+      tags: tags || [],
+    });
+
+    res.status(201).json({
+      message: "content added",
+      content,
+    });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 
 const getContent = async (req: Request, res: Response) => {
-    //@ts-expect-error
+    
     const userId = req.userId;
     const content = await ContentModel.find({
         userId:userId
