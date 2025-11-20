@@ -2,6 +2,7 @@ import express from "express";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken"
 import { UserModel } from "../model/users.model.js";
+import { ContentModel } from "../model/content.model.js";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 if (!JWT_SECRET) {
@@ -64,4 +65,31 @@ const signIn = async (req: Request, res: Response) => {
     
 };
 
-export { signUp, signIn };
+
+const postContent = async (req: Request, res: Response) => {
+    const { link, type } = req.body;
+   await ContentModel.create({
+        link, 
+        type,
+        //@ts-expect-error
+        userid: req.userId,
+        tags: []
+    })
+    res.json({
+        message: "content added"
+    })
+    
+}
+
+const getContent = async (req: Request, res: Response) => {
+    //@ts-expect-error
+    const userId = req.userId;
+    const content = await ContentModel.find({
+        userId:userId
+    }).populate("userId","username") //this will bring everything inside userId , but we dont want password etc.
+    res.json({
+        content
+    })
+}
+
+export { signUp, signIn , postContent , getContent };
