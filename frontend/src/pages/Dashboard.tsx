@@ -1,22 +1,32 @@
-import { useEffect, useState } from "react";
+import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Button } from "../components/Button";
 import { Card } from "../components/Card";
 import { CreateContentModel } from "../components/CreateContentModel";
+import { Sidebar } from "../components/Sidebar";
+import { BACKEND_URL, FRONTEND_URL } from "../config";
+import { useContent } from "../hooks/useContent";
 import { Plusicon } from "../icons/Plusicon";
 import { Shareicon } from "../icons/Shareicon";
-import { Sidebar } from "../components/Sidebar";
-import { useContent } from "../hooks/useContent";
-import axios from "axios";
-import { BACKEND_URL, FRONTEND_URL } from "../config";
 
 function Dashboard() {
   const [modelOpen, setModelOpen] = useState(false);
-  const { contents, refresh } = useContent();
 
-  useEffect(() => {
-    refresh();
-  }, [modelOpen]);
+  const queryClient = useQueryClient();
 
+  const { data: contents = [],
+    isLoading,
+    isError,
+     } = useContent();
+
+  if (isLoading) {
+    return <div className="ml-72 p-4">Loading...</div>;
+  }
+
+  if (isError) {
+    return <div className="ml-72 p-4">Something went wrong</div>;
+  }
   return (
     <div>
       <Sidebar />
@@ -26,6 +36,7 @@ function Dashboard() {
           open={modelOpen}
           onClose={() => {
             setModelOpen(false);
+            queryClient.invalidateQueries({ queryKey: ["content"] });
           }}
         />
         <div className="flex justify-end gap-4 pb-4">
@@ -48,10 +59,10 @@ function Dashboard() {
                   headers: {
                     Authorization: localStorage.getItem("token"),
                   },
-                }
+                },
               );
               const shareUrl = `${FRONTEND_URL}/api/v1/mind/${response.data.hash}`;
-               await navigator.clipboard.writeText(shareUrl);
+              await navigator.clipboard.writeText(shareUrl);
             }}
             variant="secondary"
             text="Share"
@@ -59,12 +70,14 @@ function Dashboard() {
           ></Button>
         </div>
         <div className="flex gap-4 flex-wrap ">
-          {contents.map(({ type, link, title, description }) => (
+          {contents.map((post) => (
             <Card
-              type={type}
-              link={link}
-              title={title}
-              description={description}
+              key={post._id}
+              id={post._id}
+              type={post.type}
+              link={post.link}
+              title={post.title}
+              description={post.description}
             />
           ))}
         </div>

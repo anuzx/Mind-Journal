@@ -7,7 +7,6 @@ import { ContentModel } from "../model/content.model.js";
 import { SigninSchema, SignupSchema } from "../schema/index.js";
 import { JWT_SECRET } from "../constants.js";
 
-
 const signUp = async (req: Request, res: Response) => {
   //TODO:ZOD AND HASH PASS -> DONE
 
@@ -37,16 +36,16 @@ const signUp = async (req: Request, res: Response) => {
 };
 
 const signIn = async (req: Request, res: Response) => {
-  const parsedData = SigninSchema.safeParse(req.body)
+  const parsedData = SigninSchema.safeParse(req.body);
   if (!parsedData.success) {
     res.json({
-      message:"incoorect input"
-    })
-    return
+      message: "incoorect input",
+    });
+    return;
   }
   try {
     const existingUser = await UserModel.findOne({
-      username:parsedData.data.username
+      username: parsedData.data.username,
     });
     //if user exist sign the jwt and return it to the user
     if (!existingUser) {
@@ -55,12 +54,15 @@ const signIn = async (req: Request, res: Response) => {
       });
     }
 
-    const validPassword = await bcrypt.compare(parsedData.data.password, existingUser.password)
-    
+    const validPassword = await bcrypt.compare(
+      parsedData.data.password,
+      existingUser.password,
+    );
+
     if (!validPassword) {
       res.status(401).json({
-        message:"invalid password"
-      })
+        message: "invalid password",
+      });
     }
 
     const token = jwt.sign(
@@ -70,7 +72,7 @@ const signIn = async (req: Request, res: Response) => {
       JWT_SECRET,
       {
         expiresIn: "7d",
-      }
+      },
     );
 
     return res.status(200).json({
@@ -125,17 +127,15 @@ const getContent = async (req: Request, res: Response) => {
 };
 
 const delContent = async (req: Request, res: Response) => {
- const contentId = req.body.contentId;
+  const id = req.body.id; //mongodb document id
 
- await ContentModel.deleteMany({
-   contentId,
+  await ContentModel.deleteOne({
+    _id:id, //delete this document only 
+    userId: req.userId, //safety check
+  });
+  res.json({
+    message: "Deleted",
+  });
+};
 
-   userId: req.userId,
- });
- res.json({
-   message: "Deleted",
- });
-}
-
-
-export { signUp, signIn, postContent, getContent  , delContent};
+export { signUp, signIn, postContent, getContent, delContent };

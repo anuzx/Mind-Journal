@@ -1,15 +1,39 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Deleteicon } from "../icons/Deleteicon";
 import { Notebookicon } from "../icons/Notebookicon";
 import { Shareicon } from "../icons/Shareicon";
+import { DeletePosts } from "../api/posts";
+
 
 interface CardProps {
+  id: string;
   title: string;
   link: string;
   type: "twitter" | "youtube" | "document" | "links";
   description: string;
 }
 
-export function Card({ title, link, type ,description}: CardProps) {
+export function Card({id, title, link, type, description }: CardProps) {
+  
+  const queryClient = useQueryClient();
+
+  const { mutate: deleteMutation, isPending } = useMutation({
+    mutationFn: DeletePosts,
+    onSuccess: () => {
+      // refetch posts after delete
+      queryClient.invalidateQueries({ queryKey: ["content"] });
+    },
+    onError: (error) => {
+      console.error(error);
+      alert("Failed to delete post");
+    },
+  });
+
+  function handleDelete() {
+    if (confirm("Are you sure you want to delete this post?")) {
+      deleteMutation(id);
+    }
+  }
   return (
     <div>
       <div
@@ -30,7 +54,10 @@ export function Card({ title, link, type ,description}: CardProps) {
             <div className="pr-2 text-gray-500">
               <Shareicon />
             </div>
-            <div className=" pl-4 text-gray-500">
+            <div className={`pl-4 text-gray-500 cursor-pointer ${
+              isPending ? "opacity-50 pointer-events-none" : ""
+            }`}
+            onClick={handleDelete}>
               <Deleteicon />
             </div>
           </div>

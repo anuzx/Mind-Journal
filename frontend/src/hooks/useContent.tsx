@@ -1,31 +1,23 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { BACKEND_URL } from "../config";
+import { useQuery } from "@tanstack/react-query";
+import { fetchContent } from "../api/posts";
+import type{ Content } from "../types/content";
 
 export function useContent() {
-    const [contents, setContents] = useState([]);
-
-    async function refresh() {
-        await axios.get(`${BACKEND_URL}/api/v1/user/content`, {
-            headers: {
-                "Authorization":localStorage.getItem("token")
-            }
-        })
-            .then((response) => {
-            setContents(response.data.content);
-            })
-    }
-
-    useEffect(() => {
-        refresh()
-        
-        const interval =setInterval(
-            () => {
-            refresh();
-        } ,10*1000)
-        return () => {
-            clearInterval(interval);
-        }
-    },[])
-return {contents, refresh}
+  return useQuery<Content[]>({
+    queryKey: ["content"],
+    queryFn: fetchContent,
+    refetchInterval: 10 * 1000, // replaces setInterval
+    staleTime: 5 * 1000,
+  });
 }
+//when you first load dashboard :
+/*
+TanStack Query does this:
+
+Calls fetchContent()
+
+Stores result in cache under key:
+["content"]
+
+Components subscribe to that cache
+*/

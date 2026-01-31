@@ -11,9 +11,9 @@ enum ContentType {
 }
 
 export function CreateContentModel({ open, onClose }) {
-  const titleRef = useRef<HTMLInputElement>();
-  const linkRef = useRef<HTMLInputElement>();
-  const descriptionRef = useRef<HTMLInputElement>();
+  const titleRef = useRef<HTMLInputElement | null>(null);
+  const linkRef = useRef<HTMLInputElement | null>(null);
+  const descriptionRef = useRef<HTMLInputElement| null>(null);
   const [type, setType] = useState(ContentType.Youtube);
 
   async function addContent() {
