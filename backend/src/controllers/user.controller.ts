@@ -118,10 +118,24 @@ const getContent = async (req: Request, res: Response) => {
   const userId = req.userId;
   const content = await ContentModel.find({
     userId: userId,
-  }).populate("userId", "username"); //this will bring everything inside userId , but we dont want password etc.
+  }).populate("userId", "username"); //this will bring everything inside userId ,but we dont want password etc.
   res.json({
     content,
   });
 };
 
-export { signUp, signIn, postContent, getContent };
+const delContent = async (req: Request, res: Response) => {
+ const contentId = req.body.contentId;
+
+ await ContentModel.deleteMany({
+   contentId,
+
+   userId: req.userId,
+ });
+ res.json({
+   message: "Deleted",
+ });
+}
+
+
+export { signUp, signIn, postContent, getContent  , delContent};

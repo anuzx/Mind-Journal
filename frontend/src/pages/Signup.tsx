@@ -1,23 +1,38 @@
+import { useMutation } from "@tanstack/react-query";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { signupUser } from "../api/auth";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
-import { BACKEND_URL } from "../config";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 export function Signup() {
-  const usernameRef = useRef<HTMLInputElement |null>(null);
-  const passwordRef = useRef<HTMLInputElement| null >(null);
+  const usernameRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
-  async function signup() {
+
+  const { mutate: signupMutation } = useMutation({
+    mutationFn: signupUser,
+    onSuccess: () => {
+      alert("You have signed up");
+      navigate("/signin");
+    },
+    onError: (error) => {
+      console.error(error);
+      alert("Signup failed");
+    },
+  });
+
+  //mutate(variables) ,here variables are passed to mutationFn
+
+  function signup() {
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
-    await axios.post(BACKEND_URL + "/api/v1/user/signup", {
-      username,
-      password,
-    });
-    navigate("/signin");
-    alert("you have signed up");
+    if (!username || !password) {
+      alert("All fields required");
+      return;
+    }
+
+    signupMutation({ username, password }); //signpMutation(data) , data is from auth.js
   }
 
   return (
