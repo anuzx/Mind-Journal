@@ -6,9 +6,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export function Signup() {
-  const usernameRef = useRef<HTMLInputElement>();
-    const passwordRef = useRef<HTMLInputElement>();
-    const navigate = useNavigate();
+  const usernameRef = useRef<HTMLInputElement |null>(null);
+  const passwordRef = useRef<HTMLInputElement| null >(null);
+  const navigate = useNavigate();
   async function signup() {
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
@@ -16,7 +16,7 @@ export function Signup() {
       username,
       password,
     });
-      navigate("/signin")
+    navigate("/signin");
     alert("you have signed up");
   }
 
@@ -27,6 +27,17 @@ export function Signup() {
         <Input reference={passwordRef} placeholder="Password" />
         <div className="flex justify-center pt-8">
           <Button variant="primary" text="Signup" onClick={signup} />
+        </div>
+        <div>
+          <p className="mt-8 ml-8 my-2">Already have an account?</p>
+          <div>
+            <p
+              className="text-center text-blue-500 hover:text-blue-400 hover:cursor-pointer underline"
+              onClick={() => navigate("/signin")}
+            >
+              SignIn
+            </p>
+          </div>
         </div>
       </div>
     </div>

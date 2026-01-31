@@ -1,362 +1,207 @@
 import {
   Brain,
   Link2,
-  Share2,
   Lock,
   Sparkles,
-  BookOpen,
   Users,
-  Zap,
+  Zap
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 
 function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
-      <nav className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <Brain className="w-8 h-8 text-blue-600" />
-              <span className="text-2xl font-bold text-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-white to-purple-200">
+      {/* NAVBAR */}
+      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-purple-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex h-auto min-h-[4rem] flex-wrap items-center justify-between py-3">
+            {/* LOGO */}
+            <div className="flex items-center gap-2">
+              <Brain className="w-8 h-8 text-purple-600" />
+              <span className="text-xl font-bold text-purple-600">
                 Mind Journal
               </span>
             </div>
-            <div className="hidden md:flex items-center space-x-8">
+
+            {/* DESKTOP LINKS */}
+            <div className="hidden md:flex items-center gap-8 text-sm font-medium">
               <a
                 href="#features"
-                className="text-slate-600 hover:text-slate-900 transition"
+                className="text-gray-600 hover:text-purple-600"
               >
                 Features
               </a>
               <a
                 href="#how-it-works"
-                className="text-slate-600 hover:text-slate-900 transition"
+                className="text-gray-600 hover:text-purple-600"
               >
-                How It Works
+                How it works
               </a>
-              <a
-                href="#about"
-                className="text-slate-600 hover:text-slate-900 transition"
-              >
+              <a href="#about" className="text-gray-600 hover:text-purple-600">
                 About
               </a>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-600/30">
+
+            {/* AUTH BUTTONS */}
+            <div className="w-full md:w-auto mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
+              {/* SIGN IN (always purple) */}
+              <NavLink
+                to="/signin"
+                className="text-center px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-500 transition"
+              >
                 Sign In
-              </button>
-              <button className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition shadow-lg shadow-blue-600/30">
+              </NavLink>
+
+              {/* GET STARTED */}
+              <NavLink
+                to="/signup"
+                className={({ isActive }) =>
+                  `text-center px-5 py-2 rounded-lg transition font-medium
+                   ${
+                     isActive
+                       ? "bg-purple-600 text-white"
+                       : "bg-purple-200 text-purple-600 hover:bg-purple-500 hover:text-white"
+                   }`
+                }
+              >
                 Get Started
-              </button>
+              </NavLink>
             </div>
           </div>
         </div>
       </nav>
 
-      <main>
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-32">
-          <div className="text-center">
-            <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                Capture, Organize, Share
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-slate-900 mb-6 leading-tight">
-              Your Ideas Deserve
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600">
-                A Better Home
-              </span>
-            </h1>
-            <p className="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Store your thoughts, save important links, and share your
-              knowledge with the world. Your personal mind journal, powered by
-              simplicity.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <button className="bg-blue-600 text-white px-8 py-4 rounded-xl hover:bg-blue-700 transition shadow-xl shadow-blue-600/30 text-lg font-semibold w-full sm:w-auto">
-                Start Journaling Free
-              </button>
-              <button className="bg-white text-slate-700 px-8 py-4 rounded-xl hover:bg-slate-50 transition border-2 border-slate-200 text-lg font-semibold w-full sm:w-auto">
-                Watch Demo
-              </button>
-            </div>
-          </div>
+      {/* HERO */}
+      <section className="max-w-7xl mx-auto px-4 pt-20 pb-28 text-center">
+        <div className="inline-flex items-center gap-2 bg-purple-200 text-purple-600 px-4 py-2 rounded-full mb-6">
+          <Sparkles className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            Capture · Organize · Share
+          </span>
+        </div>
 
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition border border-slate-100">
-              <div className="bg-blue-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                <BookOpen className="w-7 h-7 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
-                Capture Ideas
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                Quickly jot down thoughts, ideas, and inspirations before they
-                slip away. Your mind, organized.
-              </p>
-            </div>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-600 mb-6">
+          Your Ideas Deserve <br />
+          <span className="text-purple-600">A Better Home</span>
+        </h1>
 
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition border border-slate-100">
-              <div className="bg-cyan-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                <Link2 className="w-7 h-7 text-cyan-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
-                Save Links
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                Keep all your important resources in one place. Never lose that
-                perfect article again.
-              </p>
-            </div>
+        <p className="max-w-2xl mx-auto text-gray-600 text-lg mb-12">
+          A personal space to store thoughts, save links, and build knowledge —
+          beautifully organized.
+        </p>
 
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition border border-slate-100">
-              <div className="bg-green-100 w-14 h-14 rounded-xl flex items-center justify-center mb-4">
-                <Share2 className="w-7 h-7 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-2">
-                Share Knowledge
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                Collaborate and share your collections with others. Build
-                knowledge together.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section id="features" className="bg-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                Everything You Need
-              </h2>
-              <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-                Powerful features to help you organize your thoughts and share
-                your wisdom
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="flex flex-col items-start p-6">
-                <Zap className="w-10 h-10 text-yellow-500 mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Lightning Fast
-                </h3>
-                <p className="text-slate-600">
-                  Capture ideas in seconds. No complicated setup or learning
-                  curve.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-start p-6">
-                <Lock className="w-10 h-10 text-blue-500 mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Private & Secure
-                </h3>
-                <p className="text-slate-600">
-                  Your thoughts are yours. Keep them private or share
-                  selectively.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-start p-6">
-                <Users className="w-10 h-10 text-green-500 mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Collaborative
-                </h3>
-                <p className="text-slate-600">
-                  Share collections with teams, friends, or the entire
-                  community.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-start p-6">
-                <Brain className="w-10 h-10 text-purple-500 mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Smart Organization
-                </h3>
-                <p className="text-slate-600">
-                  Tag, categorize, and search through your ideas effortlessly.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-start p-6">
-                <Link2 className="w-10 h-10 text-cyan-500 mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Link Management
-                </h3>
-                <p className="text-slate-600">
-                  Save and organize important URLs with automatic metadata
-                  capture.
-                </p>
-              </div>
-
-              <div className="flex flex-col items-start p-6">
-                <Sparkles className="w-10 h-10 text-pink-500 mb-4" />
-                <h3 className="text-lg font-bold text-slate-900 mb-2">
-                  Beautiful Interface
-                </h3>
-                <p className="text-slate-600">
-                  A clean, intuitive design that gets out of your way and lets
-                  you focus.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="how-it-works"
-          className="py-20 bg-gradient-to-br from-blue-50 to-cyan-50"
+        <NavLink
+          to="/signup"
+          className="inline-block px-8 py-4 rounded-xl text-lg font-semibold bg-purple-500 text-white hover:bg-purple-600 transition"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-                How It Works
-              </h2>
-              <p className="text-xl text-slate-600">
-                Three simple steps to organize your mind
-              </p>
-            </div>
+          Start Free
+        </NavLink>
+      </section>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <span className="text-2xl font-bold text-blue-600">1</span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">
-                  Create Your Journal
-                </h3>
-                <p className="text-slate-600">
-                  Sign up and start your personal mind journal in seconds. No
-                  credit card required.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <span className="text-2xl font-bold text-blue-600">2</span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">
-                  Add Your Ideas
-                </h3>
-                <p className="text-slate-600">
-                  Write notes, save links, and organize everything with tags and
-                  categories.
-                </p>
-              </div>
-
-              <div className="text-center">
-                <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <span className="text-2xl font-bold text-blue-600">3</span>
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-3">
-                  Share & Collaborate
-                </h3>
-                <p className="text-slate-600">
-                  Make collections public, invite collaborators, or keep
-                  everything private.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 bg-gradient-to-r from-blue-600 to-cyan-600">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Ready to Organize Your Mind?
+      {/* FEATURES */}
+      <section id="features" className="py-24 bg-purple-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-purple-600 mb-4">
+              Features
             </h2>
-            <p className="text-xl text-blue-100 mb-10">
-              Join thousands of thinkers, creators, and learners who trust
-              MindJournal with their ideas.
+            <p className="text-gray-600 max-w-xl mx-auto">
+              Everything you need to organize your thoughts without friction.
             </p>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-xl hover:bg-blue-50 transition shadow-xl text-lg font-semibold">
-              Start Your Free Account
-            </button>
           </div>
-        </section>
-      </main>
 
-      <footer className="bg-slate-900 text-slate-400 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <Brain className="w-6 h-6 text-blue-400" />
-                <span className="text-xl font-bold text-white">Mind Journal</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+            {[
+              { icon: <Zap />, title: "Fast & Minimal" },
+              { icon: <Lock />, title: "Private & Secure" },
+              { icon: <Users />, title: "Collaborative" },
+              { icon: <Brain />, title: "Smart Organization" },
+              { icon: <Link2 />, title: "Link Management" },
+              { icon: <Sparkles />, title: "Beautiful UI" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="bg-white p-6 rounded-xl border border-purple-200 hover:shadow-lg transition"
+              >
+                <div className="text-purple-600 mb-3">{item.icon}</div>
+                <h3 className="font-semibold text-purple-600 mb-1">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Designed to help you think clearly and stay focused.
+                </p>
               </div>
-              <p className="text-sm">
-                Your personal space for ideas, links, and inspiration.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Features
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    FAQ
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Terms
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-white transition">
-                    Security
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-slate-800 pt-8 text-center text-sm">
-            <p>&copy; 2026 Mind Journal. All rights reserved.</p>
+            ))}
           </div>
         </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section
+        id="how-it-works"
+        className="py-24 bg-gradient-to-br from-white to-purple-200"
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-purple-600 mb-4">
+              How It Works
+            </h2>
+            <p className="text-gray-600">
+              Three simple steps to organize your mind
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {[
+              {
+                step: "1",
+                title: "Create Account",
+                text: "Sign up in seconds.",
+              },
+              {
+                step: "2",
+                title: "Add Ideas & Links",
+                text: "Capture thoughts and resources.",
+              },
+              {
+                step: "3",
+                title: "Organize & Share",
+                text: "Structure ideas and collaborate.",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="bg-white border border-purple-200 p-8 rounded-2xl text-center"
+              >
+                <div className="w-14 h-14 mx-auto rounded-full bg-purple-500 text-white flex items-center justify-center text-xl font-bold mb-4">
+                  {item.step}
+                </div>
+                <h3 className="text-xl font-semibold text-purple-600 mb-2">
+                  {item.title}
+                </h3>
+                <p className="text-gray-600">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ABOUT */}
+      <section id="about" className="py-24 bg-white">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold text-purple-600 mb-6">
+            About Mind Journal
+          </h2>
+          <p className="text-lg text-gray-600 leading-relaxed">
+            Mind Journal is built for thinkers, learners, and creators who want
+            a calm, focused space for their ideas — no clutter, no noise.
+          </p>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="bg-purple-200 py-10 text-center text-sm text-gray-600">
+        © 2026 Mind Journal. All rights reserved.
       </footer>
     </div>
   );
