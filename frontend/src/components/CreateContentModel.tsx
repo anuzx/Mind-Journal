@@ -1,38 +1,45 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import { ContentType, postContent } from "../api/posts";
 import { Crossicon } from "../icons/Crossicon";
 import { Button } from "./Button";
 import { Input } from "./Input";
-import axios from "axios";
-import { BACKEND_URL } from "../config";
 
-enum ContentType {
-  Youtube = "youtube",
-  Twitter = "twitter",
+interface CreateContentModelProps {
+  open: boolean;
+  onClose: () => void;
 }
 
-export function CreateContentModel({ open, onClose }) {
+export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
+  
   const titleRef = useRef<HTMLInputElement | null>(null);
   const linkRef = useRef<HTMLInputElement | null>(null);
-  const descriptionRef = useRef<HTMLInputElement| null>(null);
-  const [type, setType] = useState(ContentType.Youtube);
+  const descriptionRef = useRef<HTMLInputElement | null>(null);
+  
 
-  async function addContent() {
-    const title = titleRef.current?.value;
-    const link = linkRef.current?.value;
-    const description = descriptionRef.current?.value;
+  const [type, setType] = useState<ContentType>(ContentType.Youtube);
 
-    await axios.post(`${BACKEND_URL}/api/v1/user/content`, {
-      link,
-      title,
+  const queryClient = useQueryClient();
+
+    const { mutate: createContent} = useMutation({
+      mutationFn: postContent,
+      onSuccess: () => {
+        //tell TanStack cache: content is outdated
+        queryClient.invalidateQueries({ queryKey: ["content"] });
+        onClose();
+      },
+    });
+
+  function addContent() {
+    createContent({
+      title: titleRef.current?.value || "",
+      link: linkRef.current?.value || "",
+      description: descriptionRef.current?.value || "",
       type,
-      description,
-    }, {
-      headers: {
-        "Authorization":localStorage.getItem("token")
-      }
-    })
-    onClose()
+    });
   }
+
+  if (!open) return null;
   return (
     <div>
       {open && (

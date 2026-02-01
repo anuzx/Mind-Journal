@@ -1,32 +1,18 @@
-import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "./components/Button";
+import { CreateContentModel } from "./components/CreateContentModel";
+import { Sidebar } from "./components/Sidebar";
+import { Plusicon } from "./icons/Plusicon";
+import { Shareicon } from "./icons/Shareicon";
 import { useState } from "react";
-import { Button } from "../components/Button";
-import { Card } from "../components/Card";
-import { CreateContentModel } from "../components/CreateContentModel";
-import { Sidebar } from "../components/Sidebar";
-import { BACKEND_URL, FRONTEND_URL } from "../config";
-import { useContent } from "../hooks/useContent";
-import { Plusicon } from "../icons/Plusicon";
-import { Shareicon } from "../icons/Shareicon";
+import axios from "axios";
+import { BACKEND_URL, FRONTEND_URL } from "./config";
+import { Outlet } from "react-router-dom";
 
-function Dashboard() {
+function DashboardLayout() {
   const [modelOpen, setModelOpen] = useState(false);
-
   const queryClient = useQueryClient();
 
-  const { data: contents = [],
-    isLoading,
-    isError,
-     } = useContent();
-
-  if (isLoading) {
-    return <div className="ml-72 p-4">Loading...</div>;
-  }
-
-  if (isError) {
-    return <div className="ml-72 p-4">Something went wrong</div>;
-  }
   return (
     <div>
       <Sidebar />
@@ -69,21 +55,11 @@ function Dashboard() {
             startIcon={<Shareicon />}
           ></Button>
         </div>
-        <div className="flex gap-4 flex-wrap ">
-          {contents.map((post) => (
-            <Card
-              key={post._id}
-              id={post._id}
-              type={post.type}
-              link={post.link}
-              title={post.title}
-              description={post.description}
-            />
-          ))}
-        </div>
+        {/*page content will render here*/}
+        <Outlet />
       </div>
     </div>
   );
 }
 
-export default Dashboard;
+export default DashboardLayout;

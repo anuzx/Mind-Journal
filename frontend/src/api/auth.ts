@@ -18,7 +18,7 @@ type SigninPayload = {
 };
 
 type SigninResponse = {
-    //this will ensure that we can only access token by doing data.token when data will be argument of onSuccess
+    //this will ensure that we can only access token by doing data.token where data will be argument of onSuccess
   token: string;
 };
 

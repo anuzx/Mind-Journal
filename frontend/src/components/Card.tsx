@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Deleteicon } from "../icons/Deleteicon";
 import { Notebookicon } from "../icons/Notebookicon";
 import { Shareicon } from "../icons/Shareicon";
-import { DeletePosts } from "../api/posts";
-
+import { DeletePosts , shareContent } from "../api/posts";
+import Popup from "./Popup";
+import { useState } from "react";
 
 interface CardProps {
   id: string;
@@ -13,15 +14,20 @@ interface CardProps {
   description: string;
 }
 
-export function Card({id, title, link, type, description }: CardProps) {
-  
-  const queryClient = useQueryClient();
+export function Card({ id, title, link, type, description }: CardProps) {
 
+  const queryClient = useQueryClient();
+  
+  const [showDeletePopup, setShowDeletePopup] = useState<boolean>(false);
+  const [showSharePopup, setShowSharePopup] = useState(false);
+
+  //DELETE MUTATION
   const { mutate: deleteMutation, isPending } = useMutation({
     mutationFn: DeletePosts,
     onSuccess: () => {
       // refetch posts after delete
       queryClient.invalidateQueries({ queryKey: ["content"] });
+      setShowDeletePopup(false); //close popup after success
     },
     onError: (error) => {
       console.error(error);
@@ -29,10 +35,24 @@ export function Card({id, title, link, type, description }: CardProps) {
     },
   });
 
+  //SHARE MUTATION
+  const { mutate: shareMutation} = useMutation({
+    mutationFn: shareContent,
+    onSuccess: () => {
+      setShowSharePopup(false);
+    },
+    onError: () => {
+      alert("Failed to share post");
+    },
+  });
+
   function handleDelete() {
-    if (confirm("Are you sure you want to delete this post?")) {
-      deleteMutation(id);
-    }
+    //event hanlers dont rander ui
+   deleteMutation(id)
+  }
+
+  function handleShare() {
+    shareMutation(link);
   }
   return (
     <div>
@@ -51,13 +71,15 @@ export function Card({id, title, link, type, description }: CardProps) {
             className="
             flex items-center "
           >
-            <div className="pr-2 text-gray-500">
+            <div className="pr-2 text-gray-500  hover:text-purple-600 cursor-pointer" onClick={() => setShowSharePopup(true)}>
               <Shareicon />
             </div>
-            <div className={`pl-4 text-gray-500 cursor-pointer ${
-              isPending ? "opacity-50 pointer-events-none" : ""
-            }`}
-            onClick={handleDelete}>
+            <div
+              className={`pl-4 text-gray-500 cursor-pointer ${
+                isPending ? "opacity-50 pointer-events-none" : ""
+              } hover:text-purple-600`}
+              onClick={() => setShowDeletePopup(true)}
+            >
               <Deleteicon />
             </div>
           </div>
@@ -82,6 +104,18 @@ export function Card({id, title, link, type, description }: CardProps) {
           )}
         </div>
       </div>
+      <Popup
+        open={showDeletePopup}
+        text="Are you sure you want to delete this post?"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeletePopup(false)}
+      />
+      <Popup
+        open={showSharePopup}
+        text="Are you sure you want to share this post?"
+        onConfirm={handleShare}
+        onCancel={() => setShowSharePopup(false)}
+      />
     </div>
   );
 }

@@ -2,9 +2,8 @@
 //share()
 
 import axios from "axios";
-import { BACKEND_URL } from "../config";
+import { BACKEND_URL, FRONTEND_URL } from "../config";
 import type { Content } from "../types/content";
-
 
 export async function DeletePosts(id: string) {
   const token = localStorage.getItem("token");
@@ -29,4 +28,31 @@ export async function fetchContent(): Promise<Content[]> {
   });
 
   return response.data.content;
+}
+
+export enum ContentType {
+  Youtube = "youtube",
+  Twitter = "twitter",
+}
+
+type ContentPayload = {
+  link: string;
+  title: string;
+  type: ContentType;
+  description: string;
+};
+
+export async function postContent(data: ContentPayload) {
+  await axios.post(`${BACKEND_URL}/api/v1/user/content`, data, {
+    headers: {
+      Authorization: localStorage.getItem("token"),
+    },
+  });
+}
+
+export async function shareMind() {}
+
+export async function shareContent(link: string) {
+   await navigator.clipboard.writeText(link);
+   return link;
 }

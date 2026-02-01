@@ -10,14 +10,13 @@ export function Signin() {
   const passwordRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
-  const { mutate: signinMutation} = useMutation({
+  const { mutate: signinMutation } = useMutation({
     mutationFn: signinUser,
     onSuccess: (data) => {
       //data === {token}
       const jwt = data.token;
       localStorage.setItem("token", jwt);
       navigate("/dashboard");
-      
     },
     onError: (error) => {
       console.error("Signin failed:", error);
@@ -26,15 +25,15 @@ export function Signin() {
   });
 
   function signin() {
-     const username = usernameRef.current?.value;
-     const password = passwordRef.current?.value;
+    const username = usernameRef.current?.value;
+    const password = passwordRef.current?.value;
 
-     if (!username || !password) {
-       alert("Username and password required");
-       return;
-     }
+    if (!username || !password) {
+      alert("Username and password required");
+      return;
+    }
 
-     signinMutation({ username, password });
+    signinMutation({ username, password });
   }
 
   return (
