@@ -1,23 +1,51 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import { shareMind } from "./api/posts";
 import { Button } from "./components/Button";
 import { CreateContentModel } from "./components/CreateContentModel";
 import { Sidebar } from "./components/Sidebar";
+import SmallSideBar from "./components/SmallSideBar";
 import { Plusicon } from "./icons/Plusicon";
 import { Shareicon } from "./icons/Shareicon";
-import { useState } from "react";
-import axios from "axios";
-import { BACKEND_URL, FRONTEND_URL } from "./config";
-import { Outlet } from "react-router-dom";
+
 
 function DashboardLayout() {
   const [modelOpen, setModelOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
   const queryClient = useQueryClient();
+
+  function toggleSidebar() {
+    setIsSidebarOpen((prev) => !prev);
+  }
+
+  //SHARE MIND
+  const shareMutation = useMutation({
+    mutationFn: shareMind,
+    onSuccess: async (shareUrl) => {
+      await navigator.clipboard.writeText(shareUrl);
+      alert("Share link copied to clipboard");
+    },
+    onError: () => {
+      alert("Failed to generate share link");
+    },
+  });
+
 
   return (
     <div>
-      <Sidebar />
+      {isSidebarOpen ? (
+        <Sidebar onToggle={toggleSidebar} />
+      ) : (
+        <SmallSideBar onToggle={toggleSidebar} />
+      )}
 
-      <div className="p-4 ml-72 min-h-screen bg-gray-100 border-2">
+      <div
+        className={`p-4 min-h-screen bg-gray-100 border-2 transition-all ${
+          isSidebarOpen ? "ml-72" : "ml-20"
+        }`}
+      >
         <CreateContentModel
           open={modelOpen}
           onClose={() => {
@@ -33,27 +61,13 @@ function DashboardLayout() {
             variant="primary"
             text="Add Content"
             startIcon={<Plusicon />}
-          ></Button>
+          />
           <Button
-            onClick={async () => {
-              const response = await axios.post(
-                `${BACKEND_URL}/api/v1/mind/share`,
-                {
-                  share: true,
-                },
-                {
-                  headers: {
-                    Authorization: localStorage.getItem("token"),
-                  },
-                },
-              );
-              const shareUrl = `${FRONTEND_URL}/api/v1/mind/${response.data.hash}`;
-              await navigator.clipboard.writeText(shareUrl);
-            }}
+            onClick={() => shareMutation.mutate()}
             variant="secondary"
             text="Share"
             startIcon={<Shareicon />}
-          ></Button>
+          />
         </div>
         {/*page content will render here*/}
         <Outlet />

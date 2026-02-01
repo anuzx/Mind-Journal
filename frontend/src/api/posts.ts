@@ -50,9 +50,24 @@ export async function postContent(data: ContentPayload) {
   });
 }
 
-export async function shareMind() {}
+export async function shareMind():Promise<string> {
+   const response = await axios.post(
+     `${BACKEND_URL}/api/v1/mind/share`,
+     {
+       share: true,
+     },
+     {
+       headers: {
+         Authorization: localStorage.getItem("token"),
+       },
+     },
+   );
+   const shareUrl = `${FRONTEND_URL}/api/v1/mind/${response.data.hash}`;
+   return shareUrl
+}
 
 export async function shareContent(link: string) {
    await navigator.clipboard.writeText(link);
    return link;
 }
+
