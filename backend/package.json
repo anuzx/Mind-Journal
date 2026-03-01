@@ -2,11 +2,11 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "type": "module",
   "scripts": {
     "build": "tsc -b",
-    "start": "node dist/index.js",
+    "start": "node dist/server.js",
     "dev": "npm run build && npm run start"
   },
   "keywords": [],
@@ -19,11 +19,14 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "http-errors": "^2.0.1",
     "mongoose": "^8.20.0",
     "zod": "^4.2.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
+    "@types/http-errors": "^2.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "jsonwebtoken": "^9.0.2",
     "typescript": "^5.9.3"

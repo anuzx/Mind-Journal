@@ -1,12 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { config } from "../config/config.js";
+import { ApiError } from "../utils/ApiError.js";
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error("JWT_SECRET is missing in environment variables");
-}
-
-// Extend express request type so req.userId works
 declare global {
   namespace Express {
     interface Request {
@@ -23,11 +19,11 @@ export const AuthMiddleware = (
   const token = req.headers.authorization; // raw token
 
   if (!token) {
-    return res.status(401).json({ message: "Authorization token missing" });
+    throw new ApiError("Authorization token missing", 401);
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, config.jwt as string) as { id: string };
 
     req.userId = decoded.id;
     next();

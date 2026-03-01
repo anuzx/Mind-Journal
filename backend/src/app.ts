@@ -11,14 +11,17 @@ app.use(
     credentials: true,
   }),
 );
+import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 
 //routes
 import mindRouter from "./routes/mind.routes.js";
 import userRouter from "./routes/user.routes.js";
 
+
 app.use("/api/v1/user", userRouter);
 
 app.use("/api/v1/mind", mindRouter);
 
+app.use(globalErrorHandler)
 
 export { app };
