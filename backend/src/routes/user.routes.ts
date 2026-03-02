@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { delContent, getContent, postContent, signIn, signUp } from "../controllers/user.controller.js";
+import { delContent, getContent, logOut, postContent, refreshAccessToken, resetPassword, signIn, signUp } from "../controllers/user.controller.js";
 import { AuthMiddleware } from "../middlewares/auth.middleware.js";
-import { loginRateLimit } from "../utils/ratelimiter.js";
+import { loginRateLimit, resetPassRateLimit } from "../utils/ratelimiter.js";
 
 const router = Router();
 
@@ -12,5 +12,7 @@ router.route("/content")
   .post(AuthMiddleware, postContent)
   .delete(AuthMiddleware, delContent)
 
-
+router.post("/logout", AuthMiddleware, logOut)
+router.patch("/me/reset-password", AuthMiddleware, resetPassRateLimit, resetPassword)
+router.post("/refresh-access-token", refreshAccessToken)
 export default router;

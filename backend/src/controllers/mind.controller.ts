@@ -3,8 +3,9 @@ import { LinkModel } from "../model/link.model.js";
 import { random } from "../utils/utils.js";
 import { ContentModel } from "../model/content.model.js";
 import { UserModel } from "../model/users.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-export const shareLink = async (req: Request, res: Response) => {
+export const shareLink = asyncHandler(async (req: Request, res: Response) => {
   const share = req.body.share;
 
   if (share) {
@@ -37,7 +38,7 @@ export const shareLink = async (req: Request, res: Response) => {
       message: "removed link",
     });
   }
-}
+})
 
 export const getSharedLink = async (req: Request, res: Response) => {
   const hash = req.params.sharelink;
@@ -49,7 +50,7 @@ export const getSharedLink = async (req: Request, res: Response) => {
     res.status(404).json({
       message: "link is incorrect",
     });
-    return; //early return instead of else
+    return;
   }
 
   //if link is correct we will get all the content on that link

@@ -4,12 +4,12 @@ import bcrypt from "bcrypt";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { UserModel } from "../model/users.model.js";
 import { ContentModel } from "../model/content.model.js";
-import { ContentSchema, SigninSchema, SignupSchema } from "../validator/index.js";
+import { ContentSchema, resetPasswordSchema, SigninSchema, SignupSchema } from "../validator/index.js";
 import { config } from "../config/config.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiRes } from "../utils/ApiResponse.js";
 
-const signUp = asyncHandler(async (req: Request, res: Response) => {
+export const signUp = asyncHandler(async (req: Request, res: Response) => {
 
   const parsedData = SignupSchema.safeParse(req.body);
   if (!parsedData.success) {
@@ -31,13 +31,13 @@ const signUp = asyncHandler(async (req: Request, res: Response) => {
     password: hashedPassword,
   });
 
-  const safeUser = await UserModel.findById(user._id).select("-password")
+  const safeUser = await UserModel.findById(user._id).select("-password -refreshToken")
 
   return res.status(201).json(new ApiRes(201, "user created", safeUser));
 
 });
 
-const signIn = asyncHandler(async (req: Request, res: Response) => {
+export const signIn = asyncHandler(async (req: Request, res: Response) => {
   const parsedData = SigninSchema.safeParse(req.body);
   if (!parsedData.success) {
     throw new ApiError("INVALID_REQUEST", 400)
@@ -60,20 +60,26 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError("inavlid email or password", 401)
   }
 
-  const token = jwt.sign(
+  const access_token = jwt.sign(
     {
       id: existingUser._id,
+      name: existingUser.username
     },
-    config.jwt as string,
+    config.at_jwt,
     {
-      expiresIn: "7d",
+      expiresIn: "15m",
     },
   );
 
-  return res.status(200).json(new ApiRes(200, "login successfull", { token }));
+  const refreshToken = jwt.sign({ id: existingUser._id }, config.rt_jwt, { expiresIn: "25d" })
+
+  return res.status(201).cookie("refresh_token", refreshToken, {
+    httpOnly: true,
+    secure: true
+  }).json(new ApiRes(200, "login successfull", { access_token }));
 });
 
-const postContent = asyncHandler(async (req: Request, res: Response) => {
+export const postContent = asyncHandler(async (req: Request, res: Response) => {
   const parsedData = ContentSchema.safeParse(req.body)
 
   if (!parsedData.success) {
@@ -91,32 +97,118 @@ const postContent = asyncHandler(async (req: Request, res: Response) => {
     tags: tags || [],
   });
 
-  res.status(201).json({
-    message: "content added",
-    content,
-  });
+  res.status(201).json(new ApiRes(201, "content added", content));
 });
 
-const getContent = async (req: Request, res: Response) => {
+export const getContent = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.userId;
   const content = await ContentModel.findById({
     userId: userId,
   }).populate("userId", "username"); //this will bring everything inside userId ,but we dont want password etc.
-  res.json({
-    content,
-  });
-};
 
-const delContent = async (req: Request, res: Response) => {
+  res.json(new ApiRes(201, "all content", content));
+});
+
+export const delContent = asyncHandler(async (req: Request, res: Response) => {
   const id = req.body.id; //mongodb document id
 
   await ContentModel.deleteOne({
     _id: id, //delete this document only 
     userId: req.userId, //safety check
   });
-  res.json({
-    message: "Deleted",
-  });
-};
 
-export { signUp, signIn, postContent, getContent, delContent };
+  res.json(new ApiRes(200, "deleted", null));
+});
+
+export const logOut = asyncHandler(async (req: Request, res: Response) => {
+  await UserModel.findByIdAndUpdate({
+    id: req.userId
+  }, {
+    $unset: {
+      refreshToken: 1
+    }
+  }, {
+    new: true
+  })
+
+  return res.status(200).clearCookie("refresh_token", { httpOnly: true, secure: true }).json(
+    new ApiRes(200, "logged out", null)
+  )
+})
+
+
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const parsedData = resetPasswordSchema.safeParse(req.body)
+
+  if (!parsedData.success) {
+    throw new ApiError("INVALID_REQUEST", 400)
+  }
+
+  const { confirmPassword, newPassword, currentPassword } = parsedData.data
+  const user = await UserModel.findById(req.userId)
+  if (!user) {
+    throw new ApiError("inavlid user", 400)
+  }
+  const correctCurrentPass = await bcrypt.compare(currentPassword, user?.password)
+
+  if (!correctCurrentPass) {
+    throw new ApiError("wrong password", 400)
+  }
+  if (newPassword !== confirmPassword) {
+    throw new ApiError("password did not matched", 400)
+  }
+  const newHashedPass = await bcrypt.hash(newPassword, 10)
+  await UserModel.findByIdAndUpdate(req.userId
+    , {
+      $set: {
+        password: newHashedPass
+      }
+    }, {
+    new: true
+  })
+
+  return res.status(201).json(new ApiRes(201, "password updated successfully", null))
+})
+
+export const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
+  //extract refresh_token from cookies
+  const incomingRefreshToken = req.cookies.refresh_token
+
+  if (!incomingRefreshToken) {
+    throw new ApiError("unauthorized request", 401);
+  }
+
+  //check if incomingRefreshToken contains the correct userId
+  const decodedRefreshToken = jwt.verify(incomingRefreshToken, config.rt_jwt) as { id: string }
+  const user = await UserModel.findById(decodedRefreshToken?.id)
+
+  if (!user) {
+    throw new ApiError("invalid refresh token", 400)
+  }
+
+  //compare the incomingRefreshToken and refresh_token in db
+  if (incomingRefreshToken !== user.refreshToken) {
+    throw new ApiError("Refresh token is expired or used", 400)
+  }
+
+  //generate new access_token and refresh_token
+  const access_token = jwt.sign(
+    {
+      id: user._id,
+      name: user.username
+    },
+    config.at_jwt,
+    {
+      expiresIn: "15m",
+    },
+  );
+
+  const refreshToken = jwt.sign({ id: user._id }, config.rt_jwt, { expiresIn: "25d" })
+
+  return res.status(201).cookie("refresh_token", refreshToken, {
+    httpOnly: true,
+    secure: true
+  }).json(new ApiRes(201, "new access_token and refresh_token generated", { access_token }))
+
+})
+

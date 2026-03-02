@@ -23,7 +23,7 @@ export const AuthMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, config.jwt as string) as { id: string };
+    const decoded = jwt.verify(token, config.at_jwt) as { id: string };
 
     req.userId = decoded.id;
     next();
