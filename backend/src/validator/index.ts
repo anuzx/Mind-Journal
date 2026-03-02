@@ -22,6 +22,6 @@ export const ContentSchema = z.object({
 
 export const resetPasswordSchema = z.object({
   currentPassword: z.string(),
-  newPassword: z.string(),
+  newPassword: z.string().min(6),
   confirmPassword: z.string()
 })
