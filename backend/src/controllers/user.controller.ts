@@ -104,11 +104,30 @@ export const postContent = asyncHandler(async (req: Request, res: Response) => {
 
 export const getContent = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.userId;
-  const content = await ContentModel.findById({
-    userId: userId,
-  }).populate("userId", "username"); //this will bring everything inside userId ,but we dont want password etc.
 
-  res.json(new ApiRes(201, "all content", content));
+  const page = Number(req.query.page) || 1;
+  const limit = 8;
+  const skip = (page - 1) * limit;
+
+  if (page < 1) {
+    throw new ApiError("page number must be greater than 0", 400);
+  }
+
+  const content = await ContentModel.find({ userId })
+    .populate("userId", "username")
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 }); //newest first
+
+  const total = await ContentModel.countDocuments({ userId });
+
+  res.json(
+    new ApiRes(200, "All content", {
+      content,
+      currentPage: page,
+      totalItems: total,
+    })
+  );
 });
 
 export const delContent = asyncHandler(async (req: Request, res: Response) => {
