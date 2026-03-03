@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const contentType = ["youtube", "twitter", ];
+const contentType = ["youtube", "twitter",];
 
 const contentSchema = new Schema(
   {
@@ -22,10 +22,10 @@ const contentSchema = new Schema(
       require: true
     },
     tags: {
-  type: [mongoose.Schema.Types.ObjectId],
-  ref: "Tag",
-  default: []
-},
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Tag",
+      default: []
+    },
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,

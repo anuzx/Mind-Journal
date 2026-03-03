@@ -72,6 +72,8 @@ export const signIn = asyncHandler(async (req: Request, res: Response) => {
   );
 
   const refreshToken = jwt.sign({ id: existingUser._id }, config.rt_jwt, { expiresIn: "25d" })
+  existingUser.refreshToken = refreshToken
+  await existingUser.save()
 
   return res.status(201).cookie("refresh_token", refreshToken, {
     httpOnly: true,
@@ -192,7 +194,7 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
   }
 
   //generate new access_token and refresh_token
-  const access_token = jwt.sign(
+  const newAccess_token = jwt.sign(
     {
       id: user._id,
       name: user.username
@@ -203,12 +205,15 @@ export const refreshAccessToken = asyncHandler(async (req: Request, res: Respons
     },
   );
 
-  const refreshToken = jwt.sign({ id: user._id }, config.rt_jwt, { expiresIn: "25d" })
+  const newRefreshToken = jwt.sign({ id: user._id }, config.rt_jwt, { expiresIn: "25d" })
 
-  return res.status(201).cookie("refresh_token", refreshToken, {
+  user.refreshToken = newRefreshToken
+  await user.save({ validateBeforeSave: false })
+
+  return res.status(201).cookie("refresh_token", newRefreshToken, {
     httpOnly: true,
     secure: true
-  }).json(new ApiRes(201, "new access_token and refresh_token generated", { access_token }))
+  }).json(new ApiRes(201, "new access_token and refresh_token generated", { newAccess_token }))
 
 })
 

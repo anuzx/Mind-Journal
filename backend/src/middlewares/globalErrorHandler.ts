@@ -9,10 +9,14 @@ const globalErrorHandler = (err: HttpError, _req: Request, res: Response, _next:
   if (!(err instanceof ApiError)) {
     return res.status(500).json(new ApiRes(
       500,
-      err.message ?? "internal server error",
-      null))
+      config.env === "development"
+        ? err.message
+        : "Internal Server Error",
+      null
+    ))
   }
   return res.status(err.statusCode).json({
+    statusCode: err.statusCode,
     message: err.message,
     errorStack: config.env === "development" ? err.stack : ""
   })
