@@ -20,13 +20,21 @@ app.use(cookieParser());
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 
 //routes
-import mindRouter from "./routes/mind.routes.js";
-import userRouter from "./routes/user.routes.js";
-import contentRouter from "./routes/content.routes.js";
+import shareRouter from "./routes/share.route.js";
+import userRouter from "./routes/user.route.js";
+import contentRouter from "./routes/content.route.js";
+import uploadRouter from "./routes/upload.route.js";
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/content", contentRouter);
-app.use("/api/v1/mind", mindRouter);
+app.use("/api/v1/share", shareRouter);
+app.use("/api/v1/upload", uploadRouter);
+
+app.use((req, _res, next) => {
+  const error = new Error(`Route ${req.originalUrl} not found`);
+  (error as any).statusCode = 404;
+  next(error);
+});
 
 app.use(globalErrorHandler);
 

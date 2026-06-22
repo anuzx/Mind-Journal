@@ -15,10 +15,11 @@ const typesWithoutLink = ["image", "document"] as const;
 
 export const ContentSchema = z
   .object({
-    link: z.string().optional(),
-    title: z.string(),
-    description: z.string().optional(),
     type: z.enum(["youtube", "twitter", "image", "document", "link"]),
+    link: z.string().optional(),
+    title: z.string().optional(), // optional — AI will generate if missing
+    description: z.string().optional(),
+    tweetText: z.string().optional(), // only used when type = "twitter"
   })
   .refine(
     (data) =>

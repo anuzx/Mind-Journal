@@ -4,6 +4,7 @@ import { ContentModel } from "../model/content.model.js";
 import { ContentSchema } from "../validator/index.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiRes } from "../utils/ApiResponse.js";
+import { metadataQueue } from "../queues/metadata.queue.js";
 
 export const postContent = asyncHandler(async (req: Request, res: Response) => {
   const parsedData = ContentSchema.safeParse(req.body);
@@ -12,19 +13,27 @@ export const postContent = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError("INVALID_REQUEST", 400);
   }
 
-  const { link, description, type, title } = parsedData.data;
+  const { link, description, type, title, tweetText } = parsedData.data;
+
+  // fallback title: use link if user didn't provide one
+  // AI will generate a proper title via aiSummary after processing
+  const resolvedTitle = title || link || type;
 
   const content = await ContentModel.create({
     link,
     type,
-    title,
+    title: resolvedTitle,
     description,
     userId: req.userId,
     // metadataStatus defaults to "pending" via schema
   });
 
-  // TODO: enqueue BullMQ job here, e.g.
-  // await metadataQueue.add("process-content", { contentId: content._id });
+  await metadataQueue.add("process-content", {
+    contentId: content._id.toString(),
+    type,
+    link: link ?? "",
+    ...(tweetText ? { tweetText } : {}),
+  });
 
   res.status(201).json(new ApiRes(201, "content added", content));
 });

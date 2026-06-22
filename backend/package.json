@@ -13,24 +13,32 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cors": "^2.8.19",
+    "axios": "^1.18.0",
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.79.1",
+    "cheerio": "^1.2.0",
+    "cloudinary": "^2.10.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-rate-limit": "^8.2.1",
     "http-errors": "^2.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.12.0",
     "mongoose": "^8.20.0",
+    "pdf-parse": "^2.4.5",
+    "youtubei.js": "^17.0.1",
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/http-errors": "^2.0.5",
     "@types/jsonwebtoken": "^9.0.10",
-    "jsonwebtoken": "^9.0.2",
+    "@types/pdf-parse": "^1.1.5",
     "typescript": "^5.9.3"
   }
 }
