@@ -1,9 +1,11 @@
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
-import cookieParser from "cookie-parser"
+import cookieParser from "cookie-parser";
 const app = express();
+
 app.use(express.json());
+
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -12,18 +14,20 @@ app.use(
     credentials: true,
   }),
 );
-app.use(cookieParser())
+
+app.use(cookieParser());
+
 import { globalErrorHandler } from "./middlewares/globalErrorHandler.js";
 
 //routes
 import mindRouter from "./routes/mind.routes.js";
 import userRouter from "./routes/user.routes.js";
-
+import contentRouter from "./routes/content.routes.js";
 
 app.use("/api/v1/user", userRouter);
-
+app.use("/api/v1/content", contentRouter);
 app.use("/api/v1/mind", mindRouter);
 
-app.use(globalErrorHandler)
+app.use(globalErrorHandler);
 
 export { app };

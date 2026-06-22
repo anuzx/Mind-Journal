@@ -1,17 +1,37 @@
 import mongoose, { Schema } from "mongoose";
 
-const contentType = ["youtube", "twitter",];
+export const contentTypes = [
+  "youtube",
+  "twitter",
+  "image",
+  "document",
+  "link",
+] as const;
+export type ContentType = (typeof contentTypes)[number];
+
+// types that do NOT require a link
+const typesWithoutLink: ContentType[] = ["image", "document"];
+
+const metadataStatuses = [
+  "pending",
+  "processing",
+  "completed",
+  "failed",
+] as const;
+export type MetadataStatus = (typeof metadataStatuses)[number];
 
 const contentSchema = new Schema(
   {
     link: {
       type: String,
-      required: true,
+      required: function (this: any) {
+        return !typesWithoutLink.includes(this.type);
+      },
     },
     type: {
       type: String,
-      enum: contentType,
-      requried: true,
+      enum: contentTypes,
+      required: true,
     },
     title: {
       type: String,
@@ -19,21 +39,42 @@ const contentSchema = new Schema(
     },
     description: {
       type: String,
-      require: true
+      default: "",
     },
-    tags: {
-      type: [mongoose.Schema.Types.ObjectId],
-      ref: "Tag",
-      default: []
+
+    // AI-generated fields
+    aiSummary: {
+      type: String,
+      default: "",
+    },
+    aiTags: {
+      type: [String],
+      default: [],
+    },
+    searchText: {
+      type: String,
+      default: "",
+    },
+    metadataStatus: {
+      type: String,
+      enum: metadataStatuses,
+      default: "pending",
+    },
+    metadataError: {
+      type: String,
     },
 
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
+      index: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+// text index for search
+contentSchema.index({ searchText: "text" });
 
 export const ContentModel = mongoose.model("Content", contentSchema);
