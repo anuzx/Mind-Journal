@@ -78,7 +78,7 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
   await existingUser.save();
 
   return res
-    .status(201)
+    .status(200)
     .cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: true,
@@ -157,10 +157,15 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
   }
 
   //check if incomingRefreshToken contains the correct userId
-  const decodedRefreshToken = jwt.verify(
-    incomingRefreshToken,
-    config.rt_jwt,
-  ) as { id: string };
+  let decodedRefreshToken;
+  try {
+    decodedRefreshToken = jwt.verify(incomingRefreshToken, config.rt_jwt) as {
+      id: string;
+    };
+  } catch (error) {
+    throw new ApiError("Refresh token expired", 401);
+  }
+
   const user = await UserModel.findById(decodedRefreshToken?.id);
 
   if (!user) {

@@ -14,9 +14,9 @@ declare global {
 export const AuthMiddleware = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
-  const token = req.headers.authorization; // raw token
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     throw new ApiError("Authorization token missing", 401);

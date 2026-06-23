@@ -1,47 +1,79 @@
-import { Brain, List } from "lucide-react";
-import { DocumentsIcon } from "../icons/DocumentsIcon";
-import { LinkIcon } from "../icons/LinkIcon";
-import { TagIcon } from "../icons/TagIcon";
-import { Twitter } from "../icons/Twitter";
-import { Youtubeicon } from "../icons/Youtubeicon";
+import {
+  Brain,
+  List,
+  LayoutGrid,
+  Twitter,
+  Youtube,
+  FileText,
+  Link2,
+  StickyNote,
+} from "lucide-react";
 import { Sidebaritem } from "./Sidebaritem";
+
 export function Sidebar({ onToggle }: { onToggle: () => void }) {
   return (
-    <div className="h-screen bg-white w-72 fixed left-0 top-0 pl-6">
-      <List
-        className="my-2 rounded hover:bg-gray-200 hover:text-purple-600"
-        onClick={onToggle}
-      />
-      <div className="flex text-2xl pt-4 items-center">
-        <div className="pr-2 text-purple-600">
-          <Brain className="w-8 h-8" />
+    <div
+      className="h-screen bg-[#0D1117] border-r border-white/5 w-64 fixed left-0 top-0 flex flex-col"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+        <div className="flex items-center gap-2">
+          <Brain className="w-5 h-5 text-[#8B7CF6]" />
+          <span
+            className="text-[#ECE7DA] font-medium"
+            style={{ fontFamily: "'Fraunces', serif" }}
+          >
+            Mind Journal
+          </span>
         </div>
-        Mind Journal
+        <button
+          onClick={onToggle}
+          className="text-[#6B7280] hover:text-[#ECE7DA] transition-colors p-1 rounded hover:bg-white/5"
+        >
+          <List className="w-4 h-4" />
+        </button>
       </div>
-      <div className="pt-8 pl-4 flex flex-col gap-1">
-        <Sidebaritem text="All" icon={<Brain />} to="/dashboard" />
 
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5 overflow-y-auto">
+        <Sidebaritem
+          text="All"
+          icon={<LayoutGrid className="w-4 h-4" />}
+          to="/dashboard"
+        />
         <Sidebaritem
           text="Twitter"
-          icon={<Twitter />}
+          icon={<Twitter className="w-4 h-4" />}
           to="/dashboard/twitter"
         />
-
         <Sidebaritem
-          text="Youtube"
-          icon={<Youtubeicon />}
+          text="YouTube"
+          icon={<Youtube className="w-4 h-4" />}
           to="/dashboard/youtube"
         />
-
         <Sidebaritem
           text="Documents"
-          icon={<DocumentsIcon />}
+          icon={<FileText className="w-4 h-4" />}
           to="/dashboard/document"
         />
+        {/* Route param "link" matches schema type "link" */}
+        <Sidebaritem
+          text="Links"
+          icon={<Link2 className="w-4 h-4" />}
+          to="/dashboard/link"
+        />
+        <Sidebaritem
+          text="Notes"
+          icon={<StickyNote className="w-4 h-4" />}
+          to="/dashboard/note"
+        />
+        {/* Removed: Tags is not a content type in the schema */}
+      </nav>
 
-        <Sidebaritem text="Links" icon={<LinkIcon />} to="/dashboard/links" />
-
-        <Sidebaritem text="Tags" icon={<TagIcon />} to="/dashboard/tags" />
+      {/* Footer */}
+      <div className="px-5 py-4 border-t border-white/5">
+        <p className="text-xs text-[#6B7280]">© 2026 Mind Journal</p>
       </div>
     </div>
   );

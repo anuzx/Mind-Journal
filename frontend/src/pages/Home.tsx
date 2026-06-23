@@ -1,70 +1,194 @@
+import { useEffect, useState } from "react";
 import {
+  ArrowRight,
   Brain,
+  FileText,
   Link2,
-  Lock,
+  MessageSquare,
+  PlayCircle,
+  Search,
+  Share2,
   Sparkles,
-  Users,
-  Zap
+  StickyNote,
+  Tag,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
+const demoDrops = [
+  {
+    label: "YouTube video",
+    icon: PlayCircle,
+    raw: "youtube.com/watch?v=2c3KvZ…",
+    title: "Building AI Agents with LangGraph",
+    summary:
+      "Tutorial walking through how to build a multi-step AI agent using LangGraph and tool calling.",
+    tags: ["ai", "agents", "langgraph", "llm"],
+  },
+  {
+    label: "X / Twitter post",
+    icon: MessageSquare,
+    raw: "x.com/_/status/19038…",
+    title: "On the future of context windows",
+    summary:
+      "A short thread arguing retrieval will matter more than raw context length for most real apps.",
+    tags: ["llm", "context", "retrieval"],
+  },
+  {
+    label: "PDF",
+    icon: FileText,
+    raw: "attention-is-all-you-need.pdf",
+    title: "Attention Is All You Need",
+    summary:
+      "The original transformer paper — introduces self-attention as a replacement for recurrence.",
+    tags: ["transformers", "nlp", "research"],
+  },
+  {
+    label: "Quick note",
+    icon: StickyNote,
+    raw: "renew passport before trip",
+    title: "Renew passport",
+    summary:
+      "Reminder to renew before the September trip — book the appointment online.",
+    tags: ["todo", "personal"],
+    due: "Due Jul 15",
+  },
+];
+
+const steps = [
+  {
+    n: "01",
+    title: "Drop something in",
+    text: "Paste a link, upload a file, or jot a quick note.",
+  },
+  {
+    n: "02",
+    title: "AI reads it",
+    text: "A summary and tags appear in seconds — no typing required.",
+  },
+  {
+    n: "03",
+    title: "Search by feeling",
+    text: "Type what you remember, even without a title, and find it.",
+  },
+];
+
+const features = [
+  {
+    icon: PlayCircle,
+    title: "YouTube videos",
+    text: "Drop in a link — Mind Journal pulls the transcript and summarizes it for you.",
+  },
+  {
+    icon: MessageSquare,
+    title: "X / Twitter posts",
+    text: "Save a tweet's text and ideas without losing it in your bookmarks.",
+  },
+  {
+    icon: FileText,
+    title: "PDFs & documents",
+    text: "Upload a paper or doc — the text gets extracted and distilled automatically.",
+  },
+  {
+    icon: Link2,
+    title: "Web links",
+    text: "Any article or page gets scraped, summarized, and made searchable.",
+  },
+  {
+    icon: StickyNote,
+    title: "Notes & todos",
+    text: "Jot a note with a due date — it shows up in your day, checkbox and all.",
+  },
+  {
+    icon: Share2,
+    title: "Share your mind",
+    text: "Turn your whole vault into a public, read-only link when you want to show it off.",
+  },
+];
+
 function Home() {
+  const [active, setActive] = useState(0);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (prefersReducedMotion) return;
+
+    const id = setInterval(() => {
+      setActive((i) => (i + 1) % demoDrops.length);
+    }, 3400);
+    return () => clearInterval(id);
+  }, []);
+
+  const drop = demoDrops[active];
+  const DropIcon = drop.icon;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-white to-purple-200">
+    <div className="min-h-screen bg-[#0B0E14] text-[#ECE7DA]">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Inter:wght@400;500;600;700&display=swap');
+        .mj-display { font-family: 'Fraunces', serif; }
+        .mj-body { font-family: 'Inter', sans-serif; }
+
+        @keyframes mj-fade-up {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes mj-tag-pop {
+          from { opacity: 0; transform: scale(0.85); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes mj-blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+        .mj-card-enter { animation: mj-fade-up 0.5s ease both; }
+        .mj-tag-enter { animation: mj-tag-pop 0.35s ease both; }
+        .mj-cursor { animation: mj-blink 1s step-end infinite; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .mj-card-enter, .mj-tag-enter, .mj-cursor { animation: none !important; }
+        }
+      `}</style>
+
       {/* NAVBAR */}
-      <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur border-b border-purple-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex h-auto min-h-[4rem] flex-wrap items-center justify-between py-3">
-            {/* LOGO */}
+      <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#0B0E14]/85 backdrop-blur">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-2">
-              <Brain className="w-8 h-8 text-purple-600" />
-              <span className="text-xl font-bold text-purple-600">
+              <Brain className="w-6 h-6 text-[#8B7CF6]" />
+              <span className="mj-display text-lg font-semibold tracking-tight">
                 Mind Journal
               </span>
             </div>
 
-            {/* DESKTOP LINKS */}
-            <div className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <a
-                href="#features"
-                className="text-gray-600 hover:text-purple-600"
-              >
+            <div className="hidden md:flex items-center gap-8 text-sm mj-body text-[#9AA0AE]">
+              <a href="#features" className="hover:text-[#ECE7DA] transition">
                 Features
               </a>
               <a
                 href="#how-it-works"
-                className="text-gray-600 hover:text-purple-600"
+                className="hover:text-[#ECE7DA] transition"
               >
                 How it works
               </a>
-              <a href="#about" className="text-gray-600 hover:text-purple-600">
+              <a href="#about" className="hover:text-[#ECE7DA] transition">
                 About
               </a>
             </div>
 
-            {/* AUTH BUTTONS */}
-            <div className="w-full md:w-auto mt-4 md:mt-0 flex flex-col sm:flex-row gap-3">
-              {/* SIGN IN (always purple) */}
+            <div className="flex items-center gap-3">
               <NavLink
                 to="/signin"
-                className="text-center px-5 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-500 transition"
+                className="text-sm mj-body px-4 py-2 rounded-full text-[#ECE7DA] hover:bg-white/5 transition"
               >
-                Sign In
+                Sign in
               </NavLink>
-
-              {/* GET STARTED */}
               <NavLink
                 to="/signup"
-                className={({ isActive }) =>
-                  `text-center px-5 py-2 rounded-lg transition font-medium
-                   ${
-                     isActive
-                       ? "bg-purple-600 text-white"
-                       : "bg-purple-200 text-purple-600 hover:bg-purple-500 hover:text-white"
-                   }`
-                }
+                className="text-sm mj-body px-4 py-2 rounded-full bg-[#8B7CF6] text-[#0B0E14] font-medium hover:bg-[#A395FF] transition"
               >
-                Get Started
+                Get started
               </NavLink>
             </div>
           </div>
@@ -72,66 +196,81 @@ function Home() {
       </nav>
 
       {/* HERO */}
-      <section className="max-w-7xl mx-auto px-4 pt-20 pb-28 text-center">
-        <div className="inline-flex items-center gap-2 bg-purple-200 text-purple-600 px-4 py-2 rounded-full mb-6">
-          <Sparkles className="w-4 h-4" />
-          <span className="text-sm font-medium">
-            Capture · Organize · Share
-          </span>
-        </div>
-
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-600 mb-6">
-          Your Ideas Deserve <br />
-          <span className="text-purple-600">A Better Home</span>
-        </h1>
-
-        <p className="max-w-2xl mx-auto text-gray-600 text-lg mb-12">
-          A personal space to store thoughts, save links, and build knowledge —
-          beautifully organized.
-        </p>
-
-        <NavLink
-          to="/signup"
-          className="inline-block px-8 py-4 rounded-xl text-lg font-semibold bg-purple-500 text-white hover:bg-purple-600 transition"
-        >
-          Start Free
-        </NavLink>
-      </section>
-
-      {/* FEATURES */}
-      <section id="features" className="py-24 bg-purple-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-purple-600 mb-4">
-              Features
-            </h2>
-            <p className="text-gray-600 max-w-xl mx-auto">
-              Everything you need to organize your thoughts without friction.
-            </p>
+      <section className="max-w-6xl mx-auto px-4 pt-20 pb-24 grid md:grid-cols-2 gap-16 items-center">
+        <div>
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 mb-6 text-xs mj-body text-[#9AA0AE]">
+            <Sparkles className="w-3.5 h-3.5 text-[#F4B400]" />
+            Capture once. Organized forever.
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {[
-              { icon: <Zap />, title: "Fast & Minimal" },
-              { icon: <Lock />, title: "Private & Secure" },
-              { icon: <Users />, title: "Collaborative" },
-              { icon: <Brain />, title: "Smart Organization" },
-              { icon: <Link2 />, title: "Link Management" },
-              { icon: <Sparkles />, title: "Beautiful UI" },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="bg-white p-6 rounded-xl border border-purple-200 hover:shadow-lg transition"
-              >
-                <div className="text-purple-600 mb-3">{item.icon}</div>
-                <h3 className="font-semibold text-purple-600 mb-1">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  Designed to help you think clearly and stay focused.
-                </p>
+          <h1 className="mj-display text-5xl sm:text-6xl leading-[1.05] font-medium mb-6">
+            Everything you save,{" "}
+            <span className="italic text-[#F4B400]">organized</span> before you
+            ask.
+          </h1>
+
+          <p className="mj-body text-lg text-[#9AA0AE] max-w-md mb-10 leading-relaxed">
+            Drop in a YouTube video, a tweet, a PDF, a link, or a quick note.
+            Mind Journal reads it, summarizes it, and tags it, so a single
+            search finds it later, even if you never typed a title.
+          </p>
+
+          <div className="flex items-center gap-5">
+            <NavLink
+              to="/signup"
+              className="inline-flex items-center gap-2 mj-body px-6 py-3 rounded-full bg-[#8B7CF6] text-[#0B0E14] font-medium hover:bg-[#A395FF] transition"
+            >
+              Start free <ArrowRight className="w-4 h-4" />
+            </NavLink>
+            <a
+              href="#how-it-works"
+              className="mj-body text-sm text-[#9AA0AE] hover:text-[#ECE7DA] transition"
+            >
+              See how it works
+            </a>
+          </div>
+        </div>
+
+        {/* SIGNATURE: live ingest demo card */}
+        <div className="relative">
+          <div className="mj-body text-xs text-[#9AA0AE] mb-3 flex items-center gap-2">
+            <DropIcon className="w-3.5 h-3.5" />
+            {drop.label}
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-[#11151D] p-6 shadow-[0_0_60px_-15px_rgba(139,124,246,0.25)]">
+            <div className="mj-body text-sm text-[#6B7280] mb-4 truncate">
+              {drop.raw}
+              <span className="mj-cursor">▍</span>
+            </div>
+
+            <div key={active} className="mj-card-enter">
+              <h3 className="mj-display text-xl font-medium mb-2">
+                {drop.title}
+              </h3>
+              <p className="mj-body text-sm text-[#9AA0AE] leading-relaxed mb-4">
+                {drop.summary}
+              </p>
+
+              {drop.due && (
+                <div className="inline-flex items-center gap-1.5 text-xs mj-body text-[#F4B400] border border-[#F4B400]/30 bg-[#F4B400]/10 rounded-full px-2.5 py-1 mb-4">
+                  {drop.due}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2">
+                {drop.tags.map((tag, i) => (
+                  <span
+                    key={tag}
+                    className="mj-tag-enter mj-body inline-flex items-center gap-1 text-xs text-[#ECE7DA] bg-white/5 border border-white/10 rounded-full px-2.5 py-1"
+                    style={{ animationDelay: `${i * 90}ms` }}
+                  >
+                    <Tag className="w-3 h-3 text-[#F4B400]" />
+                    {tag}
+                  </span>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -139,69 +278,93 @@ function Home() {
       {/* HOW IT WORKS */}
       <section
         id="how-it-works"
-        className="py-24 bg-gradient-to-br from-white to-purple-200"
+        className="border-t border-white/5 bg-[#0D1117]"
       >
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-purple-600 mb-4">
-              How It Works
+        <div className="max-w-6xl mx-auto px-4 py-24">
+          <div className="mb-16 max-w-xl">
+            <h2 className="mj-display text-3xl font-medium mb-3">
+              How it works
             </h2>
-            <p className="text-gray-600">
-              Three simple steps to organize your mind
+            <p className="mj-body text-[#9AA0AE]">
+              Three steps, in order — capture comes first, AI handles the rest.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {[
-              {
-                step: "1",
-                title: "Create Account",
-                text: "Sign up in seconds.",
-              },
-              {
-                step: "2",
-                title: "Add Ideas & Links",
-                text: "Capture thoughts and resources.",
-              },
-              {
-                step: "3",
-                title: "Organize & Share",
-                text: "Structure ideas and collaborate.",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="bg-white border border-purple-200 p-8 rounded-2xl text-center"
-              >
-                <div className="w-14 h-14 mx-auto rounded-full bg-purple-500 text-white flex items-center justify-center text-xl font-bold mb-4">
-                  {item.step}
+          <div className="grid md:grid-cols-3 gap-10">
+            {steps.map((step) => (
+              <div key={step.n}>
+                <div className="mj-display text-sm text-[#8B7CF6] mb-3">
+                  {step.n}
                 </div>
-                <h3 className="text-xl font-semibold text-purple-600 mb-2">
-                  {item.title}
+                <h3 className="mj-body text-lg font-semibold mb-2">
+                  {step.title}
                 </h3>
-                <p className="text-gray-600">{item.text}</p>
+                <p className="mj-body text-[#9AA0AE] text-sm leading-relaxed">
+                  {step.text}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* FEATURES */}
+      <section id="features" className="border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 py-24">
+          <div className="mb-16 max-w-xl">
+            <h2 className="mj-display text-3xl font-medium mb-3">
+              Drop in anything
+            </h2>
+            <p className="mj-body text-[#9AA0AE]">
+              Six kinds of content, one search bar.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((f) => {
+              const Icon = f.icon;
+              return (
+                <div
+                  key={f.title}
+                  className="rounded-xl border border-white/10 bg-[#11151D] p-6 hover:border-[#8B7CF6]/40 transition"
+                >
+                  <Icon className="w-5 h-5 text-[#8B7CF6] mb-4" />
+                  <h3 className="mj-body font-semibold mb-1.5">{f.title}</h3>
+                  <p className="mj-body text-sm text-[#9AA0AE] leading-relaxed">
+                    {f.text}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* ABOUT */}
-      <section id="about" className="py-24 bg-white">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-purple-600 mb-6">
-            About Mind Journal
+      <section id="about" className="border-t border-white/5 bg-[#0D1117]">
+        <div className="max-w-3xl mx-auto px-4 py-24 text-center">
+          <Search className="w-6 h-6 text-[#F4B400] mx-auto mb-6" />
+          <h2 className="mj-display text-3xl font-medium mb-6">
+            Built for thinkers who'd rather think than file.
           </h2>
-          <p className="text-lg text-gray-600 leading-relaxed">
-            Mind Journal is built for thinkers, learners, and creators who want
-            a calm, focused space for their ideas — no clutter, no noise.
+          <p className="mj-body text-[#9AA0AE] leading-relaxed">
+            Tagging by hand doesn't scale, and you know it the moment you go
+            looking for that one video again. Mind Journal does the filing for
+            you, quietly, in the background — so the only thing left to do is
+            remember roughly what you saved, and search.
           </p>
         </div>
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-purple-200 py-10 text-center text-sm text-gray-600">
-        © 2026 Mind Journal. All rights reserved.
+      <footer className="border-t border-white/5">
+        <div className="max-w-6xl mx-auto px-4 py-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm mj-body text-[#6B7280]">
+          <div className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            Mind Journal
+          </div>
+          <p>© 2026 Mind Journal. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );

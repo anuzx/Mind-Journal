@@ -1,118 +1,202 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Deleteicon } from "../icons/Deleteicon";
-import { Notebookicon } from "../icons/Notebookicon";
-import { Shareicon } from "../icons/Shareicon";
-import { DeletePosts , shareContent } from "../api/posts";
-import Popup from "./Popup";
 import { useState } from "react";
+import {
+  Tag,
+  Trash2,
+  Share2,
+  CheckCircle2,
+  Circle,
+  ExternalLink,
+} from "lucide-react";
+import { deleteContent, toggleComplete } from "../api/content";
+import { copyLinkToClipboard } from "../api/share";
+import Popup from "./Popup";
 
 interface CardProps {
   id: string;
   title: string;
-  link: string;
-  type: "twitter" | "youtube" | "document" | "links";
+  link?: string;
+  type: "twitter" | "youtube" | "document" | "links" | "note";
   description: string;
+  tags?: string[];
+  completed?: boolean;
+  dueDate?: string;
 }
 
-export function Card({ id, title, link, type, description }: CardProps) {
-
+export function Card({
+  id,
+  title,
+  link,
+  type,
+  description,
+  tags = [],
+  completed = false,
+  dueDate,
+}: CardProps) {
   const queryClient = useQueryClient();
-  
-  const [showDeletePopup, setShowDeletePopup] = useState<boolean>(false);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [showSharePopup, setShowSharePopup] = useState(false);
 
-  //DELETE MUTATION
-  const { mutate: deleteMutation, isPending } = useMutation({
-    mutationFn: DeletePosts,
+  const { mutate: deleteMutation, isPending: isDeleting } = useMutation({
+    mutationFn: deleteContent,
     onSuccess: () => {
-      // refetch posts after delete
       queryClient.invalidateQueries({ queryKey: ["content"] });
-      setShowDeletePopup(false); //close popup after success
+      setShowDeletePopup(false);
     },
-    onError: (error) => {
-      console.error(error);
-      alert("Failed to delete post");
-    },
+    onError: () => alert("Failed to delete"),
   });
 
-  //SHARE MUTATION
-  const { mutate: shareMutation} = useMutation({
-    mutationFn: shareContent,
-    onSuccess: () => {
-      setShowSharePopup(false);
-    },
-    onError: () => {
-      alert("Failed to share post");
-    },
+  const { mutate: toggleMutation } = useMutation({
+    mutationFn: toggleComplete,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["content"] }),
   });
-
-  function handleDelete() {
-    //event hanlers dont rander ui
-   deleteMutation(id)
-  }
 
   function handleShare() {
-    shareMutation(link);
+    if (link) copyLinkToClipboard(link);
+    setShowSharePopup(false);
   }
-  return (
-    <div>
-      <div
-        className=" p-4 bg-white rounded-md shadow-md border-gray-100
-          max-w-72 border min-h-48"
-      >
-        <div className="flex justify-between">
-          <div className="flex items-center text-md ">
-            <div className="text-gray-500 pr-2">
-              <Notebookicon />
-            </div>
-            <div className="text-xl text-gray-950">{title}</div>
-          </div>
-          <div
-            className="
-            flex items-center "
-          >
-            <div className="pr-2 text-gray-500  hover:text-purple-600 cursor-pointer" onClick={() => setShowSharePopup(true)}>
-              <Shareicon />
-            </div>
-            <div
-              className={`pl-4 text-gray-500 cursor-pointer ${
-                isPending ? "opacity-50 pointer-events-none" : ""
-              } hover:text-purple-600`}
-              onClick={() => setShowDeletePopup(true)}
-            >
-              <Deleteicon />
-            </div>
-          </div>
-        </div>
-        <div className="pt-4">
-          <div className="p-2 pb-4 text-gray-800">{description}</div>
-          {type === "youtube" && (
-            <iframe
-              className="w-full"
-              src={link.replace("watch", "embed").replace("?v=", "/")}
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            ></iframe>
-          )}
 
-          {type === "twitter" && (
-            <blockquote className="twitter-tweet">
-              <a href={link.replace("x.com", "twitter.com")}></a>
-            </blockquote>
+  const typeColors: Record<string, string> = {
+    youtube: "text-red-400 bg-red-400/10 border-red-400/20",
+    twitter: "text-sky-400 bg-sky-400/10 border-sky-400/20",
+    document: "text-[#F4B400] bg-[#F4B400]/10 border-[#F4B400]/20",
+    links: "text-[#8B7CF6] bg-[#8B7CF6]/10 border-[#8B7CF6]/20",
+    note: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  };
+
+  return (
+    <div
+      className={`
+        relative bg-[#11151D] border rounded-xl p-5 w-72 min-h-48 flex flex-col gap-3
+        transition-all duration-200
+        ${completed ? "border-white/5 opacity-60" : "border-white/10 hover:border-[#8B7CF6]/40"}
+      `}
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      {/* Header */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          {type === "note" && (
+            <button
+              onClick={() => toggleMutation(id)}
+              className="mt-0.5 flex-shrink-0 text-[#8B7CF6] hover:text-[#A395FF] transition-colors"
+            >
+              {completed ? (
+                <CheckCircle2 className="w-4 h-4" />
+              ) : (
+                <Circle className="w-4 h-4" />
+              )}
+            </button>
           )}
+          <h3
+            className={`text-[#ECE7DA] font-medium text-sm leading-snug truncate ${completed ? "line-through text-[#6B7280]" : ""}`}
+            style={{ fontFamily: "'Fraunces', serif" }}
+          >
+            {title}
+          </h3>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {link && (
+            <button
+              onClick={() => setShowSharePopup(true)}
+              className="text-[#6B7280] hover:text-[#8B7CF6] transition-colors p-1 rounded"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <button
+            disabled={isDeleting}
+            onClick={() => setShowDeletePopup(true)}
+            className="text-[#6B7280] hover:text-red-400 transition-colors p-1 rounded disabled:opacity-30"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
+
+      {/* Type badge */}
+      <span
+        className={`self-start text-xs px-2 py-0.5 rounded-full border capitalize ${typeColors[type] ?? typeColors.links}`}
+      >
+        {type}
+      </span>
+
+      {/* Description */}
+      {description && (
+        <p className="text-[#9AA0AE] text-xs leading-relaxed line-clamp-3">
+          {description}
+        </p>
+      )}
+
+      {/* Due date */}
+      {dueDate && (
+        <div className="inline-flex items-center gap-1.5 text-xs text-[#F4B400] border border-[#F4B400]/30 bg-[#F4B400]/10 rounded-full px-2.5 py-1 self-start">
+          Due{" "}
+          {new Date(dueDate).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+          })}
+        </div>
+      )}
+
+      {/* Embedded content */}
+      {type === "youtube" && link && (
+        <iframe
+          className="w-full rounded-lg aspect-video mt-1"
+          src={link.replace("watch", "embed").replace("?v=", "/")}
+          title="YouTube video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      )}
+
+      {type === "twitter" && link && (
+        <blockquote className="twitter-tweet">
+          <a href={link.replace("x.com", "twitter.com")} />
+        </blockquote>
+      )}
+
+      {/* Link preview */}
+      {(type === "links" || type === "document") && link && (
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs text-[#8B7CF6] hover:text-[#A395FF] transition-colors mt-auto"
+        >
+          <ExternalLink className="w-3 h-3" />
+          <span className="truncate">{link}</span>
+        </a>
+      )}
+
+      {/* Tags */}
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
+          {tags.map((tag) => (
+            <span
+              key={tag}
+              className="inline-flex items-center gap-1 text-xs text-[#ECE7DA] bg-white/5 border border-white/10 rounded-full px-2 py-0.5"
+            >
+              <Tag className="w-2.5 h-2.5 text-[#F4B400]" />
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
       <Popup
         open={showDeletePopup}
-        text="Are you sure you want to delete this post?"
-        onConfirm={handleDelete}
+        text="Delete this entry? This can't be undone."
+        confirmLabel="Delete"
+        cancelLabel="Keep it"
+        danger
+        onConfirm={() => deleteMutation(id)}
         onCancel={() => setShowDeletePopup(false)}
       />
       <Popup
         open={showSharePopup}
-        text="Are you sure you want to share this post?"
+        text="Copy this link to clipboard?"
         onConfirm={handleShare}
         onCancel={() => setShowSharePopup(false)}
       />

@@ -1,58 +1,102 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
+import { Brain } from "lucide-react";
 import { signupUser } from "../api/auth";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 
 export function Signup() {
+  const emailRef = useRef<HTMLInputElement | null>(null);
   const usernameRef = useRef<HTMLInputElement | null>(null);
   const passwordRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
 
-  const { mutate: signupMutation } = useMutation({
+  const { mutate: signupMutation, isPending } = useMutation({
     mutationFn: signupUser,
     onSuccess: () => {
-      alert("You have signed up");
       navigate("/signin");
     },
-    onError: (error) => {
-      console.error(error);
-      alert("Signup failed");
-    },
+    onError: () => alert("Signup failed. Username may already be taken."),
   });
 
-  //mutate(variables) ,here variables are passed to mutationFn
-
   function signup() {
+    const email = emailRef.current?.value;
     const username = usernameRef.current?.value;
     const password = passwordRef.current?.value;
-    if (!username || !password) {
-      alert("All fields required");
+    if (!email || !username || !password) {
+      alert("Both fields are required.");
       return;
     }
-
-    signupMutation({ username, password }); //signpMutation(data) , data is from auth.js
+    signupMutation({ email, username, password });
   }
 
   return (
-    <div className="h-screen w-screen bg-gray-200 flex justify-center items-center">
-      <div className="bg-white rounded-xl border min-w-48 p-8">
-        <Input reference={usernameRef} placeholder="Username" />
-        <Input reference={passwordRef} placeholder="Password" />
-        <div className="flex justify-center pt-8">
-          <Button variant="primary" text="Signup" onClick={signup} />
+    <div
+      className="min-h-screen bg-[#0B0E14] flex items-center justify-center px-4"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Inter:wght@400;500;600;700&display=swap');`}</style>
+
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex items-center gap-2 justify-center mb-10">
+          <Brain className="w-6 h-6 text-[#8B7CF6]" />
+          <span
+            className="text-xl font-medium text-[#ECE7DA]"
+            style={{ fontFamily: "'Fraunces', serif" }}
+          >
+            Mind Journal
+          </span>
         </div>
-        <div>
-          <p className="mt-8 ml-8 my-2">Already have an account?</p>
-          <div>
-            <p
-              className="text-center text-blue-500 hover:text-blue-400 hover:cursor-pointer underline"
-              onClick={() => navigate("/signin")}
-            >
-              SignIn
-            </p>
+
+        {/* Card */}
+        <div className="bg-[#11151D] border border-white/10 rounded-2xl p-8 shadow-[0_0_60px_-15px_rgba(139,124,246,0.25)]">
+          <h1
+            className="text-xl font-medium text-[#ECE7DA] mb-1"
+            style={{ fontFamily: "'Fraunces', serif" }}
+          >
+            Start for free
+          </h1>
+          <p className="text-sm text-[#6B7280] mb-6">
+            Create your vault in seconds.
+          </p>
+          <Input
+            reference={emailRef}
+            placeholder="you@email.com"
+            label="Email"
+          />
+          <Input
+            reference={usernameRef}
+            placeholder="Pick a username"
+            label="Username"
+          />
+          <Input
+            reference={passwordRef}
+            placeholder="At least 6 characters"
+            type="password"
+            label="Password"
+          />
+
+          <div className="mt-6">
+            <Button
+              variant="primary"
+              text={isPending ? "Creating account…" : "Create account"}
+              onClick={signup}
+              loading={isPending}
+              fullWidth
+            />
           </div>
+
+          <p className="text-center text-sm text-[#6B7280] mt-6">
+            Already have a vault?{" "}
+            <NavLink
+              to="/signin"
+              className="text-[#8B7CF6] hover:text-[#A395FF] transition-colors"
+            >
+              Sign in
+            </NavLink>
+          </p>
         </div>
       </div>
     </div>

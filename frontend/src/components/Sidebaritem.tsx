@@ -13,18 +13,16 @@ export function Sidebaritem({ text, icon, to }: SidebarItemProps) {
       to={to}
       end
       className={({ isActive }) =>
-        `
-        flex py-4 cursor-pointer rounded max-w-48 pl-4 transition-all duration-150
+        `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150 cursor-pointer
         ${
           isActive
-            ? "bg-gray-200 text-purple-600"
-            : "hover:bg-gray-200 text-gray-700"
-        }
-        `
+            ? "bg-[#8B7CF6]/15 text-[#8B7CF6] border border-[#8B7CF6]/20"
+            : "text-[#9AA0AE] hover:bg-white/5 hover:text-[#ECE7DA] border border-transparent"
+        }`
       }
     >
-      <div className="pr-2">{icon}</div>
-      <div>{text}</div>
+      <span className="flex-shrink-0">{icon}</span>
+      <span>{text}</span>
     </NavLink>
   );
 }

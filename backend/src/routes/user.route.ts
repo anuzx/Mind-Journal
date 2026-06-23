@@ -14,13 +14,15 @@ const router = Router();
 router.route("/signup").post(signUp);
 router.route("/signin").post(loginRateLimit, signIn);
 
+router.post("/refresh-access-token", refreshAccessToken);
+
 router.post("/logout", AuthMiddleware, logOut);
+
 router.patch(
   "/me/reset-password",
   AuthMiddleware,
   resetPassRateLimit,
   resetPassword,
 );
-router.post("/refresh-access-token", AuthMiddleware, refreshAccessToken);
 
 export default router;
