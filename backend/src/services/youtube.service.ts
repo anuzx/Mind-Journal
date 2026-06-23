@@ -1,4 +1,5 @@
 import { Innertube } from "youtubei.js";
+import { PermanentError } from "../utils/PermanentError.js";
 
 function extractVideoId(url: string): string | null {
   const patterns = [
@@ -14,7 +15,7 @@ function extractVideoId(url: string): string | null {
 
 export async function extractYoutube(link: string): Promise<string> {
   const videoId = extractVideoId(link);
-  if (!videoId) throw new Error(`Invalid YouTube URL: ${link}`);
+  if (!videoId) throw new PermanentError(`Invalid YouTube URL: ${link}`);
 
   const yt = await Innertube.create({ retrieve_player: false });
   const info = await yt.getInfo(videoId);
@@ -25,8 +26,9 @@ export async function extractYoutube(link: string): Promise<string> {
     .join(" ")
     .trim();
 
-  if (!transcript) throw new Error(`No transcript available for: ${link}`);
+  if (!transcript) {
+    throw new PermanentError(`No transcript available for: ${link}`);
+  }
 
-  // trim to ~4000 chars to stay within token limits
   return transcript.slice(0, 4000);
 }

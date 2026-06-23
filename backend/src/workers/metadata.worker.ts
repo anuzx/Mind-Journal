@@ -2,63 +2,93 @@ import { Worker, Job } from "bullmq";
 import { redisConnection } from "../config/redis.js";
 import { ContentModel } from "../model/content.model.js";
 import type { MetadataJobData } from "../queues/metadata.queue.js";
+import { PermanentError } from "../utils/PermanentError.js";
 
-// TODO: import these as you build each service
-// import { extractYoutube } from "../services/youtube.service.js";
-// import { extractTwitter } from "../services/twitter.service.js";
-// import { extractLink } from "../services/link.service.js";
-// import { extractDocument } from "../services/document.service.js";
-// import { extractImage } from "../services/image.service.js";
-// import { generateSummaryAndTags } from "../services/openrouter.service.js";
+import { extractYoutube } from "../services/youtube.service.js";
+import { extractTwitter } from "../services/twitter.service.js";
+import { extractLink } from "../services/link.service.js";
+import { extractDocument } from "../services/document.service.js";
+import { validateImageUrl } from "../services/image.service.js";
+import { generateSummaryAndTags } from "../services/openrouter.service.js";
 
-async function extractText(data: MetadataJobData): Promise<string> {
-  switch (data.type) {
-    case "youtube":
-      // return extractYoutube(data.link!);
-      return `youtube:${data.link}`;
+type GenerateOptions = { text: string } | { imageUrl: string };
 
-    case "twitter":
-      // return extractTwitter(data.link!);
-      return `twitter:${data.link}`;
+async function buildGenerateOptions(
+  type: MetadataJobData["type"],
+  content: {
+    link?: string | null;
+    cloudinaryUrl?: string | null;
+    description?: string | null;
+  },
+  tweetTextFromJob?: string,
+): Promise<GenerateOptions> {
+  switch (type) {
+    case "youtube": {
+      if (!content.link) throw new PermanentError("Missing youtube link");
+      return { text: await extractYoutube(content.link) };
+    }
 
-    case "link":
-      // return extractLink(data.link!);
-      return `link:${data.link}`;
+    case "twitter": {
+      if (tweetTextFromJob && tweetTextFromJob.trim()) {
+        return { text: tweetTextFromJob };
+      }
+      if (!content.link) throw new PermanentError("Missing twitter link");
+      return { text: await extractTwitter(content.link) };
+    }
 
-    case "document":
-      // return extractDocument(data.contentId);
-      return `document:${data.contentId}`;
+    case "link": {
+      if (!content.link) throw new PermanentError("Missing link URL");
+      return { text: await extractLink(content.link) };
+    }
 
-    case "image":
-      // return extractImage(data.contentId);  <- vision model, no text extraction needed
-      return `image:${data.contentId}`;
+    case "document": {
+      if (!content.cloudinaryUrl) {
+        throw new PermanentError("Missing cloudinaryUrl for document");
+      }
+      return { text: await extractDocument(content.cloudinaryUrl) };
+    }
+
+    case "image": {
+      if (!content.cloudinaryUrl) {
+        throw new PermanentError("Missing cloudinaryUrl for image");
+      }
+      const validUrl = await validateImageUrl(content.cloudinaryUrl);
+      return { imageUrl: validUrl };
+    }
+
+    case "note": {
+      if (!content.description || !content.description.trim()) {
+        throw new PermanentError("Note has no description to summarize");
+      }
+      return { text: content.description };
+    }
 
     default:
-      throw new Error(`Unknown content type: ${data.type}`);
+      throw new PermanentError(`Unknown content type: ${type}`);
   }
 }
 
 const worker = new Worker<MetadataJobData>(
   "metadata",
   async (job: Job<MetadataJobData>) => {
-    const { contentId, type } = job.data;
+    const { contentId, type, tweetText } = job.data;
 
-    // mark as processing
+    const content = await ContentModel.findById(contentId);
+    if (!content) {
+      throw new PermanentError(`Content ${contentId} not found`);
+    }
+
     await ContentModel.findByIdAndUpdate(contentId, {
       metadataStatus: "processing",
+      $inc: { processingAttempts: 1 },
     });
 
-    // extract text / signal for vision
-    const extractedText = await extractText(job.data);
-
-    // TODO: replace stub with real call once openrouter.service.ts is built
-    // const { summary, tags } = await generateSummaryAndTags(extractedText);
-    const summary = "placeholder summary";
-    const tags = ["placeholder"];
-
-    // build searchText and update document
-    const content = await ContentModel.findById(contentId);
-    if (!content) throw new Error(`Content ${contentId} not found`);
+    const generateOptions = await buildGenerateOptions(
+      type,
+      content,
+      tweetText,
+    );
+    const { summary, tags } = await generateSummaryAndTags(generateOptions);
 
     const searchText = [
       content.title,
@@ -74,12 +104,17 @@ const worker = new Worker<MetadataJobData>(
       aiTags: tags,
       searchText,
       metadataStatus: "completed",
-      metadataError: undefined,
+      $unset: { metadataError: "" },
     });
   },
   {
     connection: redisConnection,
-    concurrency: 3, // process 3 jobs at a time
+    concurrency: 3,
+    lockDuration: 120_000,
+    limiter: {
+      max: 10,
+      duration: 60_000,
+    },
   },
 );
 
@@ -90,10 +125,14 @@ worker.on("completed", (job) => {
 });
 
 worker.on("failed", async (job, err) => {
-  console.error(`[worker] job ${job?.id} failed:`, err.message);
+  if (!job) return;
 
-  // on final failure (all retries exhausted), mark content as failed
-  if (job && job.attemptsMade >= (job.opts.attempts ?? 3)) {
+  console.error(`[worker] job ${job.id} failed:`, err.message);
+
+  const isPermanent = err instanceof PermanentError;
+  const exhaustedRetries = job.attemptsMade >= (job.opts.attempts ?? 3);
+
+  if (isPermanent || exhaustedRetries) {
     await ContentModel.findByIdAndUpdate(job.data.contentId, {
       metadataStatus: "failed",
       metadataError: err.message,

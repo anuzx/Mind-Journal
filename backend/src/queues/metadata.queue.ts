@@ -1,11 +1,13 @@
 import { Queue } from "bullmq";
 import { redisConnection } from "../config/redis.js";
+import type { ContentType } from "../model/content.model.js";
 
 export type MetadataJobData = {
   contentId: string;
-  type: "youtube" | "twitter" | "image" | "document" | "link";
-  link: string;
-  tweetText?: string; // only used when type = "twitter"
+  type: ContentType;
+  link?: string | undefined;
+  cloudinaryUrl?: string | undefined;
+  tweetText?: string;
 };
 
 export const metadataQueue = new Queue<MetadataJobData>("metadata", {

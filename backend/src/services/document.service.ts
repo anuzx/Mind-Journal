@@ -1,11 +1,10 @@
 import axios from "axios";
-import pdfParse from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
+import { PermanentError } from "../utils/PermanentError.js";
 
 function getExtensionFromUrl(url: string): string {
-  // Cloudinary URLs: https://res.cloudinary.com/.../upload/v123/filename.pdf
-  // strip query params first, then get extension
-  const cleanUrl = url.split("?")[0];
+  const cleanUrl = url.split("?")[0] ?? url;
   return cleanUrl.split(".").pop()?.toLowerCase() ?? "";
 }
 
@@ -13,10 +12,9 @@ export async function extractDocument(cloudinaryUrl: string): Promise<string> {
   const ext = getExtensionFromUrl(cloudinaryUrl);
 
   if (!["pdf", "docx", "txt"].includes(ext)) {
-    throw new Error(`Unsupported file type: .${ext}`);
+    throw new PermanentError(`Unsupported file type: .${ext}`);
   }
 
-  // download file as buffer from Cloudinary
   const response = await axios.get(cloudinaryUrl, {
     responseType: "arraybuffer",
     timeout: 30000,
@@ -27,8 +25,13 @@ export async function extractDocument(cloudinaryUrl: string): Promise<string> {
 
   switch (ext) {
     case "pdf": {
-      const result = await pdfParse(buffer);
-      text = result.text;
+      const parser = new PDFParse({ data: buffer });
+      try {
+        const result = await parser.getText();
+        text = result.text;
+      } finally {
+        await parser.destroy();
+      }
       break;
     }
     case "docx": {
@@ -43,8 +46,9 @@ export async function extractDocument(cloudinaryUrl: string): Promise<string> {
   }
 
   const cleaned = text.replace(/\s+/g, " ").trim();
-  if (!cleaned) throw new Error(`No text extracted from: ${cloudinaryUrl}`);
+  if (!cleaned) {
+    throw new PermanentError(`No text extracted from: ${cloudinaryUrl}`);
+  }
 
-  // trim to ~4000 chars to stay within token limits
   return cleaned.slice(0, 4000);
 }

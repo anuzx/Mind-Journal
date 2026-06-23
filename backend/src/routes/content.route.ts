@@ -3,8 +3,10 @@ import {
   delContent,
   getContent,
   getContentById,
+  getNotes,
   postContent,
   searchContent,
+  toggleNoteComplete,
 } from "../controllers/content.controller.js";
 import { AuthMiddleware } from "../middlewares/auth.middleware.js";
 
@@ -14,7 +16,9 @@ router.use(AuthMiddleware);
 
 router.route("/").get(getContent).post(postContent);
 
-router.get("/search", searchContent); // must come before /:id
+router.get("/search", searchContent);
+router.get("/notes", getNotes);
+router.patch("/:id/toggle-complete", toggleNoteComplete);
 router.get("/:id", getContentById);
 router.delete("/:id", delContent);
 
