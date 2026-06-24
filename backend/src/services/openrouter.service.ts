@@ -45,7 +45,7 @@ ${options.text}`;
     {
       model: isImage
         ? "meta-llama/llama-3.2-11b-vision-instruct:free"
-        : "meta-llama/llama-3.1-8b-instruct:free",
+        : "openrouter/free",
       messages: [{ role: "user", content: userContent }],
       max_tokens: 500,
     },

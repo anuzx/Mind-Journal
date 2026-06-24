@@ -7,6 +7,7 @@ const TYPE_LABELS: Record<string, string> = {
   youtube: "YouTube",
   document: "Documents",
   link: "Links",
+  image: "Images",
   note: "Notes",
 };
 
@@ -58,7 +59,7 @@ export default function DashboardType() {
         </div>
       )}
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap items-start gap-4">
         {filtered.map((post) => (
           <Card
             key={post._id}
@@ -67,8 +68,10 @@ export default function DashboardType() {
             link={post.link}
             title={post.title}
             description={post.description}
-            tags={post.tags}
-            completed={post.completed}
+            aiSummary={post.aiSummary}
+            aiTags={post.aiTags}
+            metadataStatus={post.metadataStatus}
+            isCompleted={post.isCompleted}
             dueDate={post.dueDate}
           />
         ))}

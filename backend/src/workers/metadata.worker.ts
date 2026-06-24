@@ -19,13 +19,24 @@ async function buildGenerateOptions(
     link?: string | null;
     cloudinaryUrl?: string | null;
     description?: string | null;
+    title?: string | null;
   },
   tweetTextFromJob?: string,
 ): Promise<GenerateOptions> {
   switch (type) {
     case "youtube": {
       if (!content.link) throw new PermanentError("Missing youtube link");
-      return { text: await extractYoutube(content.link) };
+      try {
+        return { text: await extractYoutube(content.link) };
+      } catch {
+        // No transcript available — fall back to title + description
+        const fallback = [content.title, content.description]
+          .filter(Boolean)
+          .join(". ")
+          .trim();
+        if (fallback) return { text: fallback };
+        throw new PermanentError(`No transcript and no fallback text for: ${content.link}`);
+      }
     }
 
     case "twitter": {

@@ -24,7 +24,7 @@ export type ContentPayload = {
 
 export async function fetchContent(): Promise<Content[]> {
   const response = await apiClient.get("/content");
-  return response.data.content;
+  return response.data.data.content;
 }
 
 export async function postContent(data: ContentPayload) {

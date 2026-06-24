@@ -118,6 +118,10 @@ const delContent = asyncHandler(async (req: Request, res: Response) => {
   res.json(new ApiRes(200, "deleted", null));
 });
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 const searchContent = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.userId;
   const q = req.query.q as string;
@@ -126,10 +130,17 @@ const searchContent = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError("search query is required", 400);
   }
 
-  const results = await ContentModel.find(
-    { userId, $text: { $search: q } },
-    { score: { $meta: "textScore" } },
-  ).sort({ score: { $meta: "textScore" } });
+  const pattern = new RegExp(escapeRegex(q.trim()), "i");
+
+  const results = await ContentModel.find({
+    userId,
+    $or: [
+      { title: pattern },
+      { description: pattern },
+      { aiSummary: pattern },
+      { aiTags: pattern }, // matches if ANY element in the array matches
+    ],
+  }).sort({ createdAt: -1 });
 
   res.json(new ApiRes(200, "search results", results));
 });

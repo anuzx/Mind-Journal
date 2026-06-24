@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Circle,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { deleteContent, toggleComplete } from "../api/content";
 import { copyLinkToClipboard } from "../api/share";
@@ -16,10 +17,12 @@ interface CardProps {
   id: string;
   title: string;
   link?: string;
-  type: "twitter" | "youtube" | "document" | "links" | "note";
+  type: "twitter" | "youtube" | "document" | "link" | "note" | "image";
   description: string;
-  tags?: string[];
-  completed?: boolean;
+  aiSummary?: string;
+  aiTags?: string[];
+  metadataStatus?: "pending" | "processing" | "completed" | "failed";
+  isCompleted?: boolean;
   dueDate?: string;
 }
 
@@ -29,8 +32,10 @@ export function Card({
   link,
   type,
   description,
-  tags = [],
-  completed = false,
+  aiSummary,
+  aiTags = [],
+  metadataStatus,
+  isCompleted = false,
   dueDate,
 }: CardProps) {
   const queryClient = useQueryClient();
@@ -60,16 +65,25 @@ export function Card({
     youtube: "text-red-400 bg-red-400/10 border-red-400/20",
     twitter: "text-sky-400 bg-sky-400/10 border-sky-400/20",
     document: "text-[#F4B400] bg-[#F4B400]/10 border-[#F4B400]/20",
-    links: "text-[#8B7CF6] bg-[#8B7CF6]/10 border-[#8B7CF6]/20",
+    link: "text-[#8B7CF6] bg-[#8B7CF6]/10 border-[#8B7CF6]/20",
+    image: "text-pink-400 bg-pink-400/10 border-pink-400/20",
     note: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   };
+
+  // The displayed body: prefer aiSummary once processing is done,
+  // fall back to the user-supplied description.
+  const bodyText =
+    metadataStatus === "completed" && aiSummary ? aiSummary : description;
+
+  const isProcessing =
+    metadataStatus === "pending" || metadataStatus === "processing";
 
   return (
     <div
       className={`
-        relative bg-[#11151D] border rounded-xl p-5 w-72 min-h-48 flex flex-col gap-3
+        relative bg-[#11151D] border rounded-xl p-5 w-72 h-fit flex flex-col gap-3
         transition-all duration-200
-        ${completed ? "border-white/5 opacity-60" : "border-white/10 hover:border-[#8B7CF6]/40"}
+        ${isCompleted ? "border-white/5 opacity-60" : "border-white/10 hover:border-[#8B7CF6]/40"}
       `}
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
@@ -81,7 +95,7 @@ export function Card({
               onClick={() => toggleMutation(id)}
               className="mt-0.5 flex-shrink-0 text-[#8B7CF6] hover:text-[#A395FF] transition-colors"
             >
-              {completed ? (
+              {isCompleted ? (
                 <CheckCircle2 className="w-4 h-4" />
               ) : (
                 <Circle className="w-4 h-4" />
@@ -89,7 +103,7 @@ export function Card({
             </button>
           )}
           <h3
-            className={`text-[#ECE7DA] font-medium text-sm leading-snug truncate ${completed ? "line-through text-[#6B7280]" : ""}`}
+            className={`text-[#ECE7DA] font-medium text-sm leading-snug truncate ${isCompleted ? "line-through text-[#6B7280]" : ""}`}
             style={{ fontFamily: "'Fraunces', serif" }}
           >
             {title}
@@ -117,16 +131,42 @@ export function Card({
 
       {/* Type badge */}
       <span
-        className={`self-start text-xs px-2 py-0.5 rounded-full border capitalize ${typeColors[type] ?? typeColors.links}`}
+        className={`self-start text-xs px-2 py-0.5 rounded-full border capitalize ${typeColors[type] ?? typeColors.link}`}
       >
         {type}
       </span>
 
-      {/* Description */}
-      {description && (
-        <p className="text-[#9AA0AE] text-xs leading-relaxed line-clamp-3">
-          {description}
-        </p>
+      {/* AI processing indicator */}
+      {isProcessing && (
+        <div className="flex items-center gap-1.5 text-xs text-[#6B7280]">
+          <Loader2 className="w-3 h-3 animate-spin text-[#8B7CF6]" />
+          <span>AI summary generating…</span>
+        </div>
+      )}
+
+      {/* Body text: aiSummary (when ready) or description */}
+      {bodyText && (
+        <div>
+          {metadataStatus === "completed" && aiSummary ? (
+            <div>
+              <p className="text-[9px] uppercase tracking-widest text-[#8B7CF6] mb-1 font-medium">
+                AI Summary
+              </p>
+              <p className="text-[#9AA0AE] text-xs leading-relaxed line-clamp-4">
+                {bodyText}
+              </p>
+            </div>
+          ) : (
+            <p className="text-[#9AA0AE] text-xs leading-relaxed line-clamp-3">
+              {bodyText}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Failed metadata notice */}
+      {metadataStatus === "failed" && (
+        <p className="text-xs text-red-400/70">AI processing failed.</p>
       )}
 
       {/* Due date */}
@@ -158,22 +198,22 @@ export function Card({
       )}
 
       {/* Link preview */}
-      {(type === "links" || type === "document") && link && (
+      {(type === "link" || type === "document") && link && (
         <a
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 text-xs text-[#8B7CF6] hover:text-[#A395FF] transition-colors mt-auto"
+          className="flex items-center gap-1.5 text-xs text-[#8B7CF6] hover:text-[#A395FF] transition-colors"
         >
           <ExternalLink className="w-3 h-3" />
           <span className="truncate">{link}</span>
         </a>
       )}
 
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-auto pt-1">
-          {tags.map((tag) => (
+      {/* AI Tags */}
+      {aiTags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {aiTags.map((tag) => (
             <span
               key={tag}
               className="inline-flex items-center gap-1 text-xs text-[#ECE7DA] bg-white/5 border border-white/10 rounded-full px-2 py-0.5"

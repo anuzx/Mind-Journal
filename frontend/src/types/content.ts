@@ -3,9 +3,11 @@ export type Content = {
   title: string;
   description: string;
   link?: string;
-  type: "twitter" | "youtube" | "document" | "link" | "note";
-  tags?: string[];
-  completed?: boolean;
+  type: "twitter" | "youtube" | "document" | "link" | "note" | "image";
+  aiTags: string[];
+  aiSummary: string;
+  metadataStatus: "pending" | "processing" | "completed" | "failed";
+  isCompleted?: boolean;
   dueDate?: string;
   cloudinaryUrl?: string;
   publicId?: string;

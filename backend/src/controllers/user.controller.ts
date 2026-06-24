@@ -67,7 +67,7 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
     },
     config.at_jwt,
     {
-      expiresIn: "15m",
+      expiresIn: "2m",
     },
   );
 
