@@ -59,14 +59,14 @@ function DashboardLayout() {
         <div className="sticky top-0 z-30 flex items-center justify-end gap-2 px-6 py-3 border-b border-white/5 bg-[#0B0E14]/90 backdrop-blur">
           <Button
             variant="secondary"
-            text={isSharing ? "Copying…" : "Share vault"}
+            text={isSharing ? "Copying…" : "Share Brain"}
             startIcon={<Share2 className="w-3.5 h-3.5" />}
             onClick={() => shareVault()}
             loading={isSharing}
           />
           <Button
             variant="primary"
-            text="Add"
+            text="Add Content"
             startIcon={<Plus className="w-3.5 h-3.5" />}
             onClick={() => setModelOpen(true)}
           />

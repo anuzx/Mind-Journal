@@ -5,16 +5,18 @@ import { Brain } from "lucide-react";
 import { signinUser } from "../api/auth";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
+import { useAuthStore } from "../stores/auth.store";
 
 export function Signin() {
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const setAccessToken = useAuthStore((s) => s.setAccessToken);
 
   const { mutate: signinMutation, isPending } = useMutation({
     mutationFn: signinUser,
     onSuccess: (data) => {
-      localStorage.setItem("access_token", data.data.access_token);
+      setAccessToken(data.data.access_token);
       navigate("/dashboard");
     },
     onError: () => alert("Incorrect username or password."),
