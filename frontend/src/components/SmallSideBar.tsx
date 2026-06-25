@@ -2,23 +2,24 @@ import {
   Brain,
   List,
   LayoutGrid,
-  Twitter,
   Youtube,
   FileText,
   Link2,
   StickyNote,
+  Image,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { FaXTwitter } from "react-icons/fa6";
 
 function SmallSideBar({ onToggle }: { onToggle: () => void }) {
   const items = [
     { icon: <LayoutGrid className="w-4 h-4" />, to: "/dashboard" },
-    { icon: <Twitter className="w-4 h-4" />, to: "/dashboard/twitter" },
+    { icon: <FaXTwitter className="w-4 h-4" />, to: "/dashboard/twitter" },
     { icon: <Youtube className="w-4 h-4" />, to: "/dashboard/youtube" },
     { icon: <FileText className="w-4 h-4" />, to: "/dashboard/document" },
-    { icon: <Link2 className="w-4 h-4" />, to: "/dashboard/link" }, // fixed: was /dashboard/links
+    { icon: <Image className="w-4 h-4" />, to: "/dashboard/image" },
+    { icon: <Link2 className="w-4 h-4" />, to: "/dashboard/link" },
     { icon: <StickyNote className="w-4 h-4" />, to: "/dashboard/note" },
-    // Removed: /dashboard/tags — not a real content type
   ];
 
   return (

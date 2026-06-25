@@ -1,10 +1,11 @@
-import { apiClient } from "./auth"; 
+import { apiClient } from "./auth";
 import type { Content } from "../types/content";
 
 export enum ContentType {
   Youtube = "youtube",
   Twitter = "twitter",
   Document = "document",
+  Image = "image",
   Link = "link",
   Note = "note",
 }
@@ -21,10 +22,16 @@ export type ContentPayload = {
   resourceType?: "image" | "raw";
 };
 
+export type ContentPage = {
+  content: Content[];
+  currentPage: number;
+  totalItems: number;
+};
 
-export async function fetchContent(): Promise<Content[]> {
-  const response = await apiClient.get("/content");
-  return response.data.data.content;
+
+export async function fetchContent(page = 1): Promise<ContentPage> {
+  const response = await apiClient.get("/content", { params: { page } });
+  return response.data.data;
 }
 
 export async function postContent(data: ContentPayload) {

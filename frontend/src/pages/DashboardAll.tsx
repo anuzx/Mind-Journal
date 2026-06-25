@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card } from "../components/Card";
 import { SearchBar } from "../components/SearchBar";
 import { useContent } from "../hooks/useContent";
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import { searchContent } from "../api/search";
 import { CreateContentModel } from "../components/CreateContentModel";
 
@@ -10,7 +11,15 @@ function DashboardAll() {
   const [query, setQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
 
-  const { data: contents = [], isLoading, isError } = useContent();
+  const {
+    data: contents = [],
+    totalItems,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useContent();
 
   const { data: searchResults, isFetching: isSearching } = useQuery({
     queryKey: ["search", query],
@@ -19,7 +28,16 @@ function DashboardAll() {
     staleTime: 30_000,
   });
 
-  const displayed = query.trim().length > 1 ? (searchResults ?? []) : contents;
+  const isSearchActive = query.trim().length > 1;
+  const displayed = isSearchActive ? (searchResults ?? []) : contents;
+
+  // Only paginate the default browse view — search results come back as a
+  // single unpaginated array from the backend, so there's nothing to scroll-load.
+  const sentinelRef = useInfiniteScroll({
+    hasNextPage: !isSearchActive && hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
   return (
     <div
@@ -35,7 +53,9 @@ function DashboardAll() {
           Everything
         </h1>
         <p className="text-sm text-[#6B7280] mt-0.5">
-          {contents.length} {contents.length === 1 ? "entry" : "entries"}
+          {isSearchActive
+            ? `${displayed.length} ${displayed.length === 1 ? "result" : "results"}`
+            : `${totalItems} ${totalItems === 1 ? "entry" : "entries"}`}
         </p>
       </div>
 
@@ -84,9 +104,21 @@ function DashboardAll() {
             metadataStatus={post.metadataStatus}
             isCompleted={post.isCompleted}
             dueDate={post.dueDate}
+            cloudinaryUrl={post.cloudinaryUrl}
           />
         ))}
       </div>
+
+      {/* Infinite scroll sentinel + loading indicator — only relevant for the
+          default browse view, not search results */}
+      {!isSearchActive && (
+        <div ref={sentinelRef} className="flex justify-center py-8">
+          {isFetchingNextPage && (
+            <span className="w-5 h-5 border-2 border-[#8B7CF6] border-t-transparent rounded-full animate-spin" />
+          )}
+          {!hasNextPage && contents.length > 0 && <></>}
+        </div>
+      )}
 
       <CreateContentModel
         open={showModal}

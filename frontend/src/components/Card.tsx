@@ -24,6 +24,7 @@ interface CardProps {
   metadataStatus?: "pending" | "processing" | "completed" | "failed";
   isCompleted?: boolean;
   dueDate?: string;
+  cloudinaryUrl?: string;
 }
 
 export function Card({
@@ -37,6 +38,7 @@ export function Card({
   metadataStatus,
   isCompleted = false,
   dueDate,
+  cloudinaryUrl,
 }: CardProps) {
   const queryClient = useQueryClient();
   const [showDeletePopup, setShowDeletePopup] = useState(false);
@@ -81,7 +83,7 @@ export function Card({
   return (
     <div
       className={`
-        relative bg-[#11151D] border rounded-xl p-5 w-72 h-fit flex flex-col gap-3
+        relative bg-[#11151D] border rounded-xl p-5 w-72 flex flex-col gap-3
         transition-all duration-200
         ${isCompleted ? "border-white/5 opacity-60" : "border-white/10 hover:border-[#8B7CF6]/40"}
       `}
@@ -197,8 +199,19 @@ export function Card({
         </blockquote>
       )}
 
-      {/* Link preview */}
-      {(type === "link" || type === "document") && link && (
+      {/* Uploaded image preview */}
+      {type === "image" && cloudinaryUrl && (
+        <img
+          src={cloudinaryUrl}
+          alt={title}
+          className="w-full rounded-lg object-cover max-h-56 mt-1"
+          loading="lazy"
+        />
+      )}
+
+      {/* Link preview — "link" type uses the user-entered link;
+          "document" type uses the uploaded file's Cloudinary URL */}
+      {type === "link" && link && (
         <a
           href={link}
           target="_blank"
@@ -207,6 +220,18 @@ export function Card({
         >
           <ExternalLink className="w-3 h-3" />
           <span className="truncate">{link}</span>
+        </a>
+      )}
+
+      {type === "document" && cloudinaryUrl && (
+        <a
+          href={cloudinaryUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 text-xs text-[#8B7CF6] hover:text-[#A395FF] transition-colors"
+        >
+          <ExternalLink className="w-3 h-3" />
+          <span className="truncate">View document</span>
         </a>
       )}
 

@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { useContent } from "../hooks/useContent";
+import { useInfiniteScroll } from "../hooks/useInfiniteScroll";
 import { Card } from "../components/Card";
+import { SearchBar } from "../components/SearchBar";
 
 const TYPE_LABELS: Record<string, string> = {
   twitter: "Twitter",
@@ -13,10 +16,34 @@ const TYPE_LABELS: Record<string, string> = {
 
 export default function DashboardType() {
   const { type } = useParams<{ type: string }>();
-  const { data = [], isLoading, isError } = useContent();
+  const {
+    data = [],
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useContent();
+  const [query, setQuery] = useState("");
 
-  const filtered = data.filter((post) => post.type === type);
+  const filtered = data.filter((post) => {
+    if (post.type !== type) return false;
+    if (query.trim().length <= 1) return true;
+    const q = query.trim().toLowerCase();
+    return (
+      post.title?.toLowerCase().includes(q) ||
+      post.description?.toLowerCase().includes(q) ||
+      post.aiSummary?.toLowerCase().includes(q) ||
+      post.aiTags?.some((tag) => tag.toLowerCase().includes(q))
+    );
+  });
   const label = TYPE_LABELS[type ?? ""] ?? type;
+
+  const sentinelRef = useInfiniteScroll({
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  });
 
   return (
     <div
@@ -38,6 +65,9 @@ export default function DashboardType() {
         )}
       </div>
 
+      {/* Search bar — filters this type's entries client-side, no extra fetch */}
+      <SearchBar onSearch={setQuery} className="mb-8" />
+
       {isLoading && (
         <div className="flex items-center gap-2 text-[#6B7280] text-sm">
           <span className="w-4 h-4 border-2 border-[#8B7CF6] border-t-transparent rounded-full animate-spin" />
@@ -54,7 +84,11 @@ export default function DashboardType() {
       {!isLoading && !isError && filtered.length === 0 && (
         <div className="text-center py-24">
           <p className="text-[#6B7280] text-sm">
-            No {label?.toLowerCase()} saved yet.
+            {query.trim().length > 1
+              ? `No results for "${query}"`
+              : hasNextPage
+                ? "Loading more…"
+                : `No ${label?.toLowerCase()} saved yet.`}
           </p>
         </div>
       )}
@@ -73,8 +107,18 @@ export default function DashboardType() {
             metadataStatus={post.metadataStatus}
             isCompleted={post.isCompleted}
             dueDate={post.dueDate}
+            cloudinaryUrl={post.cloudinaryUrl}
           />
         ))}
+      </div>
+
+      {/* Infinite scroll sentinel — keeps pulling more of the full feed so
+          this type's filtered list can keep growing */}
+      <div ref={sentinelRef} className="flex justify-center py-8">
+        {isFetchingNextPage && (
+          <span className="w-5 h-5 border-2 border-[#8B7CF6] border-t-transparent rounded-full animate-spin" />
+        )}
+        {!hasNextPage && data.length > 0 && <></>}
       </div>
     </div>
   );

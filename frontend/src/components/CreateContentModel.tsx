@@ -1,7 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { X, Youtube, Twitter, FileText, Link2, StickyNote } from "lucide-react";
+import { X, Youtube, Image, FileText, Link2, StickyNote } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import { ContentType, postContent } from "../api/content";
+import { uploadToCloudinary } from "../api/upload";
 import { Button } from "./Button";
 import { Input } from "./Input";
 
@@ -19,12 +21,17 @@ const TYPES: { label: string; value: ContentType; icon: React.ReactNode }[] = [
   {
     label: "Twitter",
     value: ContentType.Twitter,
-    icon: <X className="w-3.5 h-3.5" />,
+    icon: <FaXTwitter className="w-3.5 h-3.5" />,
   },
   {
     label: "Document",
     value: ContentType.Document,
     icon: <FileText className="w-3.5 h-3.5" />,
+  },
+  {
+    label: "Images",
+    value: ContentType.Image,
+    icon: <Image className="w-3.5 h-3.5" />,
   },
   {
     label: "Link",
@@ -42,10 +49,10 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
   const titleRef = useRef<HTMLInputElement>(null);
   const linkRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLInputElement>(null);
-  const tagsRef = useRef<HTMLInputElement>(null);
   const dueDateRef = useRef<HTMLInputElement>(null);
-
+  const fileRef = useRef<HTMLInputElement>(null);
   const [type, setType] = useState<ContentType>(ContentType.Youtube);
+  const [isUploading, setIsUploading] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -58,22 +65,41 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
     onError: () => alert("Failed to save. Please try again."),
   });
 
-  function addContent() {
-    const rawTags = tagsRef.current?.value ?? "";
-    const tags = rawTags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+  async function addContent() {
+    const file = fileRef.current?.files?.[0];
 
-    // Per schema: link required for youtube/twitter/link types
-    // description required for note type
-    // dueDate only valid for note type
+    if (needsFile && !file) {
+      alert(`Please choose ${isImage ? "an image" : "a document"} to upload.`);
+      return;
+    }
+
+    let cloudinaryUrl: string | undefined;
+    let publicId: string | undefined;
+    let resourceType: "image" | "raw" | undefined;
+
+    if (needsFile && file) {
+      setIsUploading(true);
+      try {
+        const uploaded = await uploadToCloudinary(file);
+        cloudinaryUrl = uploaded.cloudinaryUrl;
+        publicId = uploaded.publicId;
+        resourceType = uploaded.resourceType;
+      } catch {
+        alert("Failed to upload file. Please try again.");
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
     createContent({
       title: titleRef.current?.value || undefined,
       link: needsLink ? linkRef.current?.value || undefined : undefined,
       description: descriptionRef.current?.value || undefined,
       type,
-      tags,
+      cloudinaryUrl,
+      publicId,
+      resourceType,
       dueDate:
         type === ContentType.Note
           ? dueDateRef.current?.value || undefined
@@ -89,7 +115,9 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
   ].includes(type);
   // Schema: description is required for note (show textarea hint)
   const isNote = type === ContentType.Note;
-
+  const isImage = type === ContentType.Image;
+  const isDocument = type === ContentType.Document;
+  const needsFile = isImage || isDocument;
   if (!open) return null;
 
   return (
@@ -165,14 +193,35 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
               placeholder={isNote ? "Write your note…" : "What's this about?"}
               label={`Description${isNote ? " (required)" : ""}`}
             />
+            {needsFile && (
+              <div className="flex flex-col gap-1">
+                <label className="text-sm text-[#ECE7DA]">
+                  {isImage ? "Image" : "Document"}
+                </label>
 
-            {/* Tags: available for all types */}
-            <Input
-              reference={tagsRef}
-              placeholder="ai, research, todo"
-              label="Tags (comma-separated)"
-            />
-
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept={
+                    isImage ? "image/*" : ".pdf,.doc,.docx,.txt,.ppt,.pptx"
+                  }
+                  className="
+                    bg-white/5
+                    border border-white/10
+                    rounded-lg
+                    px-3 py-2
+                    text-sm text-[#ECE7DA]
+                    file:bg-[#8B7CF6]
+                    file:border-0
+                    file:text-[#0B0E14]
+                    file:px-3
+                    file:py-1
+                    file:rounded-md
+                    file:mr-3
+                  "
+                />
+              </div>
+            )}
             {/* Due date: only valid for notes per schema */}
             {isNote && (
               <Input
@@ -189,9 +238,9 @@ export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
             <Button variant="ghost" text="Cancel" onClick={onClose} />
             <Button
               variant="primary"
-              text="Save"
+              text={isUploading ? "Uploading…" : "Save"}
               onClick={addContent}
-              loading={isPending}
+              loading={isUploading || isPending}
             />
           </div>
         </div>

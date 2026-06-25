@@ -6,7 +6,6 @@ type AIMetadata = {
   tags: string[];
 };
 
-// For image type — pass imageUrl instead of text
 type GenerateOptions =
   | { text: string; imageUrl?: never }
   | { imageUrl: string; text?: never };
@@ -43,9 +42,7 @@ ${options.text}`;
   const response = await axios.post(
     "https://openrouter.ai/api/v1/chat/completions",
     {
-      model: isImage
-        ? "meta-llama/llama-3.2-11b-vision-instruct:free"
-        : "openrouter/free",
+      model: "openrouter/free",
       messages: [{ role: "user", content: userContent }],
       max_tokens: 500,
     },

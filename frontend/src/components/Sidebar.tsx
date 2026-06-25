@@ -2,13 +2,14 @@ import {
   Brain,
   List,
   LayoutGrid,
-  Twitter,
   Youtube,
   FileText,
   Link2,
   StickyNote,
+  Image,
 } from "lucide-react";
 import { Sidebaritem } from "./Sidebaritem";
+import { FaXTwitter } from "react-icons/fa6";
 
 export function Sidebar({ onToggle }: { onToggle: () => void }) {
   return (
@@ -19,7 +20,7 @@ export function Sidebar({ onToggle }: { onToggle: () => void }) {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
         <div className="flex items-center gap-2">
-          <Brain className="w-5 h-5 text-[#8B7CF6]" />
+          <Brain className="w-5.5 h-7 text-[#8B7CF6]" />
           <span
             className="text-[#ECE7DA] font-medium"
             style={{ fontFamily: "'Fraunces', serif" }}
@@ -44,7 +45,7 @@ export function Sidebar({ onToggle }: { onToggle: () => void }) {
         />
         <Sidebaritem
           text="Twitter"
-          icon={<Twitter className="w-4 h-4" />}
+          icon={<FaXTwitter className="w-4 h-4" />}
           to="/dashboard/twitter"
         />
         <Sidebaritem
@@ -57,7 +58,11 @@ export function Sidebar({ onToggle }: { onToggle: () => void }) {
           icon={<FileText className="w-4 h-4" />}
           to="/dashboard/document"
         />
-        {/* Route param "link" matches schema type "link" */}
+        <Sidebaritem
+          text="Images"
+          icon={<Image className="w-4 h-4" />}
+          to="/dashboard/image"
+        />
         <Sidebaritem
           text="Links"
           icon={<Link2 className="w-4 h-4" />}
