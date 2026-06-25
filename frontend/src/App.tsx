@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import DashboardLayout from "./DashboardLayout";
 import DashboardType from "./pages/DashboardType";
 import { useRestoreSession } from "./hooks/useRestoreSession";
+import SharedBrain from "./pages/SharedBrain";
 
 function App() {
   const { isRestoring } = useRestoreSession();
@@ -15,6 +16,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/share/:hash" element={<SharedBrain />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/signin" element={<Signin />} />
         <Route path="/dashboard" element={<DashboardLayout />}>

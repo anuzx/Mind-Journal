@@ -4,6 +4,8 @@ import { random } from "../services/link.js";
 import { ContentModel } from "../model/content.model.js";
 import { UserModel } from "../model/users.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiRes } from "../utils/ApiResponse.js";
 
 export const shareLink = asyncHandler(async (req: Request, res: Response) => {
   const share = req.body.share;
@@ -14,9 +16,7 @@ export const shareLink = asyncHandler(async (req: Request, res: Response) => {
     });
 
     if (existingLink) {
-      res.json({
-        hash: existingLink.hash,
-      });
+      res.json(new ApiRes(200, "share link", { hash: existingLink.hash }));
       return;
     }
 
@@ -25,50 +25,48 @@ export const shareLink = asyncHandler(async (req: Request, res: Response) => {
       userId: req.userId,
       hash: hash,
     });
-    res.json({
-      message: "/share/" + hash,
-    });
-  } else {
-    //if the user wants to disable the url
-    LinkModel.deleteOne({
-      userId: req.userId,
-    });
 
-    res.json({
-      message: "removed link",
-    });
-  }
-})
-
-export const getSharedLink = async (req: Request, res: Response) => {
-  const hash = req.params.sharelink;
-
-  const link = await LinkModel.findOne({
-    hash,
-  });
-  if (!link) {
-    res.status(404).json({
-      message: "link is incorrect",
-    });
+    res.json(new ApiRes(201, "share link created", { hash }));
     return;
   }
 
-  //if link is correct we will get all the content on that link
-  const content = await ContentModel.find({
-    userId: link.userId,
+  // user wants to disable the share link
+  await LinkModel.deleteOne({
+    userId: req.userId,
   });
-  //user information
-  const user = await UserModel.findOne({
-    _id: link.userId,
-  });
-  if (!user) {
-    res.status(404).json({
-      message: "user not found",
+
+  res.json(new ApiRes(200, "removed link", null));
+});
+
+export const getSharedLink = asyncHandler(
+  async (req: Request, res: Response) => {
+    const hash = req.params.share;
+
+    const link = await LinkModel.findOne({
+      hash,
     });
-    return;
-  }
-  res.json({
-    username: user.username,
-    content: content,
-  });
-}
+    if (!link) {
+      throw new ApiError("link is incorrect", 404);
+    }
+
+    // link is valid — fetch all content belonging to that user
+    const content = await ContentModel.find({
+      userId: link.userId,
+    }).sort({ createdAt: -1 });
+
+    const user = await UserModel.findOne({
+      _id: link.userId,
+    }).select("-password -refreshToken");
+
+    if (!user) {
+      throw new ApiError("user not found", 404);
+    }
+
+    res.json(
+      new ApiRes(200, "shared vault", {
+        username: user.username,
+        content,
+      }),
+    );
+  },
+);
