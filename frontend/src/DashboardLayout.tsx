@@ -1,28 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Plus, Share2, LogOut } from "lucide-react";
+import { Plus, Share2 } from "lucide-react";
 import { shareMind } from "./api/share";
-import { logoutUser } from "./api/auth";
 import { Button } from "./components/Button";
 import { CreateContentModel } from "./components/CreateContentModel";
 import { Sidebar } from "./components/Sidebar";
 import SmallSideBar from "./components/SmallSideBar";
-import { useNavigate } from "react-router-dom";
 
 function DashboardLayout() {
   const [modelOpen, setModelOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   function toggleSidebar() {
     setIsSidebarOpen((prev) => !prev);
-  }
-
-  function handleLogout() {
-    logoutUser();
-    navigate("/signin");
   }
 
   const { mutate: shareVault, isPending: isSharing } = useMutation({
@@ -70,13 +62,6 @@ function DashboardLayout() {
             startIcon={<Plus className="w-3.5 h-3.5" />}
             onClick={() => setModelOpen(true)}
           />
-          <button
-            onClick={handleLogout}
-            className="ml-1 p-2 rounded-lg text-[#6B7280] hover:text-red-400 hover:bg-red-400/10 transition-all duration-150"
-            title="Sign out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
 
         {/* Page content */}

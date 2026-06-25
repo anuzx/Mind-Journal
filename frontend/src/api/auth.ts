@@ -12,7 +12,7 @@ type SigninResponse = {
 
 export const apiClient = axios.create({
   baseURL: `${BACKEND_URL}/api/v1`,
-  withCredentials: true, // sends the refresh_token cookie on every request
+  withCredentials: true,
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -41,7 +41,7 @@ function processQueue(error: unknown, token: string | null) {
 }
 
 apiClient.interceptors.response.use(
-  (response) => response, // 2xx – pass straight through
+  (response) => response,
 
   async (error) => {
     const originalRequest = error.config;
@@ -91,8 +91,8 @@ apiClient.interceptors.response.use(
       processQueue(refreshError, null);
       useAuthStore.getState().clearAccessToken();
 
-      // Redirect to login — adjust the path to match your router setup
-      window.location.href = "/login";
+      
+      window.location.href = "/signin";
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
@@ -108,9 +108,4 @@ export async function signupUser(data: SignupPayload) {
 export async function signinUser(data: SigninPayload): Promise<SigninResponse> {
   const response = await apiClient.post<SigninResponse>("/user/signin", data);
   return response.data;
-}
-
-export async function logoutUser() {
-  await apiClient.post("/user/logout");
-  useAuthStore.getState().clearAccessToken();
 }

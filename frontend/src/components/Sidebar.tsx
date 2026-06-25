@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Brain,
   List,
@@ -7,11 +8,15 @@ import {
   Link2,
   StickyNote,
   Image,
+  Settings,
 } from "lucide-react";
 import { Sidebaritem } from "./Sidebaritem";
+import { SettingsModal } from "./SettingsModal";
 import { FaXTwitter } from "react-icons/fa6";
 
 export function Sidebar({ onToggle }: { onToggle: () => void }) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   return (
     <div
       className="h-screen bg-[#0D1117] border-r border-white/5 w-64 fixed left-0 top-0 flex flex-col"
@@ -77,9 +82,21 @@ export function Sidebar({ onToggle }: { onToggle: () => void }) {
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4 border-t border-white/5">
-        <p className="text-xs text-[#6B7280]">© 2026 Mind Journal</p>
+      <div className="px-3 py-3 border-t border-white/5 flex flex-col gap-0.5">
+        <button
+          onClick={() => setSettingsOpen(true)}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#9AA0AE] hover:bg-white/5 hover:text-[#ECE7DA] border border-transparent transition-all duration-150"
+        >
+          <Settings className="w-4 h-4 flex-shrink-0" />
+          <span>Settings</span>
+        </button>
+        <p className="text-xs text-[#6B7280] px-3 pt-2">© 2026 Mind Journal</p>
       </div>
+
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </div>
   );
 }

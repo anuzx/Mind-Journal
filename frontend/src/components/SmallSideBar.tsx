@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Brain,
   List,
@@ -7,11 +8,15 @@ import {
   Link2,
   StickyNote,
   Image,
+  Settings,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { FaXTwitter } from "react-icons/fa6";
+import { SettingsModal } from "./SettingsModal";
 
 function SmallSideBar({ onToggle }: { onToggle: () => void }) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const items = [
     { icon: <LayoutGrid className="w-4 h-4" />, to: "/dashboard" },
     { icon: <FaXTwitter className="w-4 h-4" />, to: "/dashboard/twitter" },
@@ -57,6 +62,20 @@ function SmallSideBar({ onToggle }: { onToggle: () => void }) {
           </NavLink>
         ))}
       </nav>
+
+      {/* Settings */}
+      <button
+        onClick={() => setSettingsOpen(true)}
+        className="p-2.5 rounded-lg text-[#6B7280] hover:bg-white/5 hover:text-[#ECE7DA] transition-all duration-150"
+        title="Settings"
+      >
+        <Settings className="w-4 h-4" />
+      </button>
+
+      <SettingsModal
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
     </div>
   );
 }

@@ -88,9 +88,7 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
 
 const logOut = asyncHandler(async (req: Request, res: Response) => {
   await UserModel.findByIdAndUpdate(
-    {
-      id: req.userId,
-    },
+    req.userId,
     {
       $unset: {
         refreshToken: 1,
