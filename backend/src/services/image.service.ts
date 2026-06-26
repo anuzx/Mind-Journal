@@ -8,7 +8,7 @@ export async function validateImageUrl(imageUrl: string): Promise<string> {
   try {
     // HEAD request to confirm the URL is reachable and is an image
     const response = await axios.head(imageUrl, { timeout: 10000 });
-    const contentType = response.headers["content-type"] ?? "";
+    const contentType = String(response.headers["content-type"] ?? "");
 
     if (!contentType.startsWith("image/")) {
       throw new Error(`URL does not point to an image: ${contentType}`);
