@@ -82,6 +82,7 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
     .cookie("refresh_token", refreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
     })
     .json(new ApiRes(200, "login successfull", { access_token }));
 });
@@ -101,7 +102,11 @@ const logOut = asyncHandler(async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .clearCookie("refresh_token", { httpOnly: true, secure: true })
+    .clearCookie("refresh_token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    })
     .json(new ApiRes(200, "logged out", null));
 });
 
@@ -199,6 +204,7 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
     .cookie("refresh_token", newRefreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
     })
     .json(
       new ApiRes(201, "new access_token and refresh_token generated", {

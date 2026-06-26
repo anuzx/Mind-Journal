@@ -4,11 +4,13 @@ import express from "express";
 import cookieParser from "cookie-parser";
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(express.json());
 
 app.use(
   cors({
-    origin: [config.frontend_url , "http://localhost:5173"],
+    origin: [config.frontend_url, "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
