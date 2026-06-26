@@ -8,8 +8,8 @@ import { Input } from "../components/Input";
 import { useAuthStore } from "../stores/auth.store";
 
 export function Signin() {
-  const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement | null>(null);
+  const passwordRef = useRef<HTMLInputElement | null>(null);
   const navigate = useNavigate();
   const setAccessToken = useAuthStore((s) => s.setAccessToken);
 

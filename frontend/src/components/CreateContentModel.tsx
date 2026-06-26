@@ -46,11 +46,11 @@ const TYPES: { label: string; value: ContentType; icon: React.ReactNode }[] = [
 ];
 
 export function CreateContentModel({ open, onClose }: CreateContentModelProps) {
-  const titleRef = useRef<HTMLInputElement>(null);
-  const linkRef = useRef<HTMLInputElement>(null);
-  const descriptionRef = useRef<HTMLInputElement>(null);
-  const dueDateRef = useRef<HTMLInputElement>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const titleRef = useRef<HTMLInputElement | null>(null);
+  const linkRef = useRef<HTMLInputElement | null>(null);
+  const descriptionRef = useRef<HTMLInputElement | null>(null);
+  const dueDateRef = useRef<HTMLInputElement | null>(null);
+  const fileRef = useRef<HTMLInputElement | null>(null);
   const [type, setType] = useState<ContentType>(ContentType.Youtube);
   const [isUploading, setIsUploading] = useState(false);
 

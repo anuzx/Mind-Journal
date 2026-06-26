@@ -1,6 +1,6 @@
 interface InputProps {
   placeholder: string;
-  reference?: React.RefObject<HTMLInputElement>;
+  reference?: React.RefObject<HTMLInputElement | null>;
   type?: "text" | "password" | "email" | "date";
   label?: string;
 }
