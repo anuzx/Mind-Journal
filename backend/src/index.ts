@@ -7,7 +7,7 @@ connectDB()
     // boot worker after DB is ready
     import("./workers/metadata.worker.js");
 
-    app.listen(config.port || 8000, () =>
+    app.listen(config.port || 3000, () =>
       console.log(`server is running at: ${config.port}`),
     );
   })

@@ -8,7 +8,7 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: [config.frontend_url , "http://localhost:5173"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -24,6 +24,7 @@ import shareRouter from "./routes/share.route.js";
 import userRouter from "./routes/user.route.js";
 import contentRouter from "./routes/content.route.js";
 import uploadRouter from "./routes/upload.route.js";
+import { config } from "./config/config.js";
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/content", contentRouter);

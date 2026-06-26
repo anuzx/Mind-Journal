@@ -67,12 +67,12 @@ const signIn = asyncHandler(async (req: Request, res: Response) => {
     },
     config.at_jwt,
     {
-      expiresIn: "2m",
+      expiresIn: config.ex_at_jwt as any,
     },
   );
 
   const refreshToken = jwt.sign({ id: existingUser._id }, config.rt_jwt, {
-    expiresIn: "25d",
+    expiresIn: config.ex_rt_jwt as any,
   });
   existingUser.refreshToken = refreshToken;
   await existingUser.save();
