@@ -177,6 +177,9 @@ const refreshAccessToken = asyncHandler(async (req: Request, res: Response) => {
 
   //compare the incomingRefreshToken and refresh_token in db
   if (incomingRefreshToken !== user.refreshToken) {
+    console.warn(`[BREACH] Refresh token reuse detected for user ${user._id}`);
+    user.refreshToken = null;
+    await user.save({ validateBeforeSave: false });
     throw new ApiError("Refresh token is expired or used", 400);
   }
 

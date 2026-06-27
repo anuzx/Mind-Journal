@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Tag,
   Trash2,
@@ -57,6 +57,27 @@ export function Card({
     mutationFn: toggleComplete,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["content"] }),
   });
+
+  function TwitterEmbed({ link }: { link: string }) {
+    useEffect(() => {
+      if (
+        !document.querySelector(
+          'script[src="https://platform.twitter.com/widgets.js"]',
+        )
+      ) {
+        const script = document.createElement("script");
+        script.src = "https://platform.twitter.com/widgets.js";
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }, []);
+
+    return (
+      <blockquote className="twitter-tweet">
+        <a href={link.replace("x.com", "twitter.com")} />
+      </blockquote>
+    );
+  }
 
   function handleShare() {
     if (link) copyLinkToClipboard(link);
@@ -193,11 +214,7 @@ export function Card({
         />
       )}
 
-      {type === "twitter" && link && (
-        <blockquote className="twitter-tweet">
-          <a href={link.replace("x.com", "twitter.com")} />
-        </blockquote>
-      )}
+      {type === "twitter" && link && <TwitterEmbed link={link} />}
 
       {/* Uploaded image preview */}
       {type === "image" && cloudinaryUrl && (

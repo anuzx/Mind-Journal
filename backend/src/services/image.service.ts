@@ -1,12 +1,17 @@
 import axios from "axios";
+import { URL } from "url";
 
-// Images are handled directly by the OpenRouter vision model.
-// No text extraction needed — we pass the Cloudinary image URL to the AI.
-// This service just validates the URL is reachable before sending it.
+function validateCloudinaryUrl(urlStr: string): void {
+  const parsed = new URL(urlStr);
+  if (!parsed.hostname.endsWith(".cloudinary.com")) {
+    throw new Error("Invalid image URL");
+  }
+}
 
 export async function validateImageUrl(imageUrl: string): Promise<string> {
+  validateCloudinaryUrl(imageUrl);
+
   try {
-    // HEAD request to confirm the URL is reachable and is an image
     const response = await axios.head(imageUrl, { timeout: 10000 });
     const contentType = String(response.headers["content-type"] ?? "");
 
@@ -14,8 +19,6 @@ export async function validateImageUrl(imageUrl: string): Promise<string> {
       throw new Error(`URL does not point to an image: ${contentType}`);
     }
   } catch (err: any) {
-    // if HEAD fails (some servers block it), proceed anyway —
-    // OpenRouter will fail with a clearer error if the URL is truly bad
     if (!err.response) throw err;
   }
 

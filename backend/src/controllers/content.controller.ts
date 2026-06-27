@@ -19,7 +19,6 @@ const postContent = asyncHandler(async (req: Request, res: Response) => {
     description,
     type,
     title,
-    tweetText,
     cloudinaryUrl,
     publicId,
     resourceType,
@@ -42,7 +41,7 @@ const postContent = asyncHandler(async (req: Request, res: Response) => {
     dueDate,
     isCompleted,
     userId: req.userId,
-    // metadataStatus defaults to "pending" via schema
+    searchText: [resolvedTitle, description].filter(Boolean).join(" "),
   });
 
   await metadataQueue.add("process-content", {
@@ -50,7 +49,6 @@ const postContent = asyncHandler(async (req: Request, res: Response) => {
     type,
     link,
     cloudinaryUrl,
-    ...(tweetText ? { tweetText } : {}),
   });
 
   res.status(201).json(new ApiRes(201, "content added", content));
@@ -118,10 +116,6 @@ const delContent = asyncHandler(async (req: Request, res: Response) => {
   res.json(new ApiRes(200, "deleted", null));
 });
 
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
 const searchContent = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.userId;
   const q = req.query.q as string;
@@ -130,17 +124,10 @@ const searchContent = asyncHandler(async (req: Request, res: Response) => {
     throw new ApiError("search query is required", 400);
   }
 
-  const pattern = new RegExp(escapeRegex(q.trim()), "i");
-
-  const results = await ContentModel.find({
-    userId,
-    $or: [
-      { title: pattern },
-      { description: pattern },
-      { aiSummary: pattern },
-      { aiTags: pattern }, // matches if ANY element in the array matches
-    ],
-  }).sort({ createdAt: -1 });
+  const results = await ContentModel.find(
+    { userId, $text: { $search: q.trim() } },
+    { score: { $meta: "textScore" } },
+  ).sort({ score: { $meta: "textScore" } });
 
   res.json(new ApiRes(200, "search results", results));
 });

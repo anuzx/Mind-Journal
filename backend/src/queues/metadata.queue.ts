@@ -7,7 +7,6 @@ export type MetadataJobData = {
   type: ContentType;
   link?: string | undefined;
   cloudinaryUrl?: string | undefined;
-  tweetText?: string;
 };
 
 export const metadataQueue = new Queue<MetadataJobData>("metadata", {

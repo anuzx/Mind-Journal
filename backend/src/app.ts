@@ -1,16 +1,24 @@
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 const app = express();
 
 app.set("trust proxy", 1);
 
-app.use(express.json());
+app.use(helmet());
+
+app.use(express.json({ limit: "1mb" }));
+
+const allowedOrigins = [config.frontend_url];
+if (config.env !== "production") {
+  allowedOrigins.push("http://localhost:5173");
+}
 
 app.use(
   cors({
-    origin: [config.frontend_url, "http://localhost:5173"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

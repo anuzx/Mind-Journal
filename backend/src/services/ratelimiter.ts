@@ -24,6 +24,18 @@ export const loginRateLimit = rateLimit({
 })
 
 
+export const contentRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) =>
+    res.status(429).json({
+      message: "too many requests",
+      retryAfter: req.rateLimit?.resetTime
+    }),
+});
+
 export const resetPassRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 5,

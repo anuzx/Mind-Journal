@@ -15,7 +15,6 @@ export type ContentPayload = {
   title?: string;
   type: ContentType;
   description?: string;
-  tags?: string[];
   dueDate?: string;
   cloudinaryUrl?: string;
   publicId?: string;

@@ -9,10 +9,11 @@ import {
   toggleNoteComplete,
 } from "../controllers/content.controller.js";
 import { AuthMiddleware } from "../middlewares/auth.middleware.js";
+import { contentRateLimit } from "../services/ratelimiter.js";
 
 const router = Router();
 
-router.use(AuthMiddleware);
+router.use(AuthMiddleware, contentRateLimit);
 
 router.route("/").get(getContent).post(postContent);
 

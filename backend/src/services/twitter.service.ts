@@ -1,3 +1,3 @@
-export async function extractTwitter(tweetText?: string): Promise<string> {
-  return tweetText?.trim() ?? "";
+export async function extractTwitter(link: string): Promise<string> {
+  return link;
 }

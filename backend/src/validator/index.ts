@@ -4,7 +4,7 @@ import { contentTypes } from "../model/content.model.js";
 export const SignupSchema = z.object({
   email: z.email(),
   username: z.string().min(3).max(20),
-  password: z.string().min(6),
+  password: z.string().min(6).max(128),
 });
 
 export const SigninSchema = z.object({
@@ -15,13 +15,12 @@ export const SigninSchema = z.object({
 export const ContentSchema = z
   .object({
     type: z.enum(contentTypes),
-    title: z.string().trim().optional(),
-    description: z.string().trim().optional().default(""),
-    link: z.url().optional(),
-    cloudinaryUrl: z.url().optional(),
-    publicId: z.string().optional(),
+    title: z.string().trim().max(500).optional(),
+    description: z.string().trim().max(5000).optional().default(""),
+    link: z.url().max(2000).optional(),
+    cloudinaryUrl: z.url().max(2000).optional(),
+    publicId: z.string().max(500).optional(),
     resourceType: z.enum(["image", "raw"]).optional(),
-    tweetText: z.string().optional(),
     dueDate: z.coerce.date().optional(),
     isCompleted: z.boolean().optional(),
   })
@@ -68,7 +67,7 @@ export const ContentSchema = z
   );
 
 export const resetPasswordSchema = z.object({
-  currentPassword: z.string(),
-  newPassword: z.string().min(6),
-  confirmPassword: z.string(),
+  currentPassword: z.string().max(128),
+  newPassword: z.string().min(6).max(128),
+  confirmPassword: z.string().max(128),
 });

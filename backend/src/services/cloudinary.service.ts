@@ -24,9 +24,15 @@ export function generateUploadSignature({
   const timestamp = Math.round(Date.now() / 1000);
   const folder = `mindjournal/${userId}`;
 
+  const allowedFormats = resourceType === "image"
+    ? "jpg,jpeg,png,gif,webp"
+    : "pdf,doc,docx,txt,ppt,pptx";
+
   const paramsToSign: Record<string, string | number> = {
     timestamp,
     folder,
+    bytes: 10 * 1024 * 1024,
+    allowed_formats: allowedFormats,
   };
 
   const signature = cloudinary.utils.api_sign_request(

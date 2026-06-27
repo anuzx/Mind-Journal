@@ -2,13 +2,23 @@ import axios from "axios";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import { PermanentError } from "../utils/PermanentError.js";
+import { URL } from "url";
 
 function getExtensionFromUrl(url: string): string {
   const cleanUrl = url.split("?")[0] ?? url;
   return cleanUrl.split(".").pop()?.toLowerCase() ?? "";
 }
 
+function validateCloudinaryUrl(urlStr: string): void {
+  const parsed = new URL(urlStr);
+  if (!parsed.hostname.endsWith(".cloudinary.com")) {
+    throw new PermanentError("Invalid document URL");
+  }
+}
+
 export async function extractDocument(cloudinaryUrl: string): Promise<string> {
+  validateCloudinaryUrl(cloudinaryUrl);
+
   const ext = getExtensionFromUrl(cloudinaryUrl);
 
   if (!["pdf", "docx", "txt"].includes(ext)) {

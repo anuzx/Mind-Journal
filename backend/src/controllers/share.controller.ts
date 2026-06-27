@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { LinkModel } from "../model/link.model.js";
-import { random } from "../services/link.js";
+import { random } from "../services/hash.js";
 import { ContentModel } from "../model/content.model.js";
 import { UserModel } from "../model/users.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";

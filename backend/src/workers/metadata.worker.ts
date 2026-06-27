@@ -21,7 +21,6 @@ async function buildGenerateOptions(
     description?: string | null;
     title?: string | null;
   },
-  tweetTextFromJob?: string,
 ): Promise<GenerateOptions> {
   switch (type) {
     case "youtube": {
@@ -40,9 +39,6 @@ async function buildGenerateOptions(
     }
 
     case "twitter": {
-      if (tweetTextFromJob && tweetTextFromJob.trim()) {
-        return { text: tweetTextFromJob };
-      }
       if (!content.link) throw new PermanentError("Missing twitter link");
       return { text: await extractTwitter(content.link) };
     }
@@ -82,7 +78,7 @@ async function buildGenerateOptions(
 const worker = new Worker<MetadataJobData>(
   "metadata",
   async (job: Job<MetadataJobData>) => {
-    const { contentId, type, tweetText } = job.data;
+    const { contentId, type } = job.data;
 
     const content = await ContentModel.findById(contentId);
     if (!content) {
@@ -97,7 +93,6 @@ const worker = new Worker<MetadataJobData>(
     const generateOptions = await buildGenerateOptions(
       type,
       content,
-      tweetText,
     );
     const { summary, tags } = await generateSummaryAndTags(generateOptions);
 
