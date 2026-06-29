@@ -14,12 +14,20 @@ import { Sidebaritem } from "./Sidebaritem";
 import { SettingsModal } from "./SettingsModal";
 import { FaXTwitter } from "react-icons/fa6";
 
-export function Sidebar({ onToggle }: { onToggle: () => void }) {
+export function Sidebar({
+  onToggle,
+  className = "",
+  onNavClick,
+}: {
+  onToggle: () => void;
+  className?: string;
+  onNavClick?: () => void;
+}) {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <div
-      className="h-screen bg-[#0D1117] border-r border-white/5 w-64 fixed left-0 top-0 flex flex-col"
+      className={`h-screen bg-[#0D1117] border-r border-white/5 w-64 flex flex-col ${className}`}
       style={{ fontFamily: "'Inter', sans-serif" }}
     >
       {/* Top bar */}
@@ -42,7 +50,7 @@ export function Sidebar({ onToggle }: { onToggle: () => void }) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5 overflow-y-auto" onClick={onNavClick}>
         <Sidebaritem
           text="All"
           icon={<LayoutGrid className="w-4 h-4" />}

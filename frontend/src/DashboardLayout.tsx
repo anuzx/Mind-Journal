@@ -62,10 +62,13 @@ function DashboardLayout() {
             mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <Sidebar onToggle={toggleSidebar} />
+          <Sidebar
+            onToggle={toggleSidebar}
+            onNavClick={() => setMobileSidebarOpen(false)}
+          />
         </div>
       ) : isSidebarOpen ? (
-        <Sidebar onToggle={toggleSidebar} />
+        <Sidebar onToggle={toggleSidebar} className="fixed left-0 top-0" />
       ) : (
         <SmallSideBar onToggle={toggleSidebar} />
       )}
