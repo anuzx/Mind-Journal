@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { Plus, Share2 } from "lucide-react";
+import { Plus, Share2, List } from "lucide-react";
 import { shareMind } from "./api/share";
 import { Button } from "./components/Button";
 import { CreateContentModel } from "./components/CreateContentModel";
@@ -11,10 +11,23 @@ import SmallSideBar from "./components/SmallSideBar";
 function DashboardLayout() {
   const [modelOpen, setModelOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   function toggleSidebar() {
-    setIsSidebarOpen((prev) => !prev);
+    if (isMobile) {
+      setMobileSidebarOpen((prev) => !prev);
+    } else {
+      setIsSidebarOpen((prev) => !prev);
+    }
   }
 
   const { mutate: shareVault, isPending: isSharing } = useMutation({
@@ -34,8 +47,24 @@ function DashboardLayout() {
     >
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=Inter:wght@400;500;600;700&display=swap');`}</style>
 
-      {/* Sidebar */}
-      {isSidebarOpen ? (
+      {/* Mobile backdrop */}
+      {isMobile && mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar — mobile drawer or desktop fixed */}
+      {isMobile ? (
+        <div
+          className={`fixed inset-y-0 left-0 z-50 transition-transform duration-200 ${
+            mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <Sidebar onToggle={toggleSidebar} />
+        </div>
+      ) : isSidebarOpen ? (
         <Sidebar onToggle={toggleSidebar} />
       ) : (
         <SmallSideBar onToggle={toggleSidebar} />
@@ -44,11 +73,19 @@ function DashboardLayout() {
       {/* Main content */}
       <div
         className={`min-h-screen bg-[#0B0E14] transition-all duration-200 ${
-          isSidebarOpen ? "ml-64" : "ml-16"
+          isMobile ? "ml-0" : isSidebarOpen ? "ml-64" : "ml-16"
         }`}
       >
         {/* Top bar */}
-        <div className="sticky top-0 z-30 flex items-center justify-end gap-2 px-6 py-3 border-b border-white/5 bg-[#0B0E14]/90 backdrop-blur">
+        <div className="sticky top-0 z-30 flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-b border-white/5 bg-[#0B0E14]/90 backdrop-blur">
+          {isMobile && (
+            <button
+              onClick={toggleSidebar}
+              className="text-[#6B7280] hover:text-[#ECE7DA] transition-colors p-1.5 rounded hover:bg-white/5 mr-auto"
+            >
+              <List className="w-4 h-4" />
+            </button>
+          )}
           <Button
             variant="secondary"
             text={isSharing ? "Copying…" : "Share Brain"}
@@ -65,7 +102,7 @@ function DashboardLayout() {
         </div>
 
         {/* Page content */}
-        <div className="px-6 py-6">
+        <div className="px-4 sm:px-6 py-6">
           <Outlet />
         </div>
       </div>

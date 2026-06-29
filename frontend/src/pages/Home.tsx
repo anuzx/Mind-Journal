@@ -63,7 +63,7 @@ const steps = [
   {
     n: "02",
     title: "AI reads it",
-    text: "A summary and tags appear in seconds — no typing required.",
+    text: "A summary and tags appear in seconds no typing required.",
   },
   {
     n: "03",
@@ -85,8 +85,8 @@ const features = [
   },
   {
     icon: FileText,
-    title: "PDFs & documents",
-    text: "Upload a paper or doc — the text gets extracted and distilled automatically.",
+    title: "Images & documents",
+    text: "Upload an Image or doc the text gets extracted and distilled automatically.",
   },
   {
     icon: Link2,
@@ -109,11 +109,6 @@ function Home() {
   const [active, setActive] = useState(0);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (prefersReducedMotion) return;
-
     const id = setInterval(() => {
       setActive((i) => (i + 1) % demoDrops.length);
     }, 3400);
@@ -210,9 +205,9 @@ function Home() {
           </h1>
 
           <p className="mj-body text-lg text-[#9AA0AE] max-w-md mb-10 leading-relaxed">
-            Drop in a YouTube video, a tweet, a PDF, a link, or a quick note.
-            Mind Journal reads it, summarizes it, and tags it, so a single
-            search finds it later, even if you never typed a title.
+            Drop in a YouTube video, a tweet, a PDF, an Image, a link, or a
+            quick note. Mind Journal reads it, summarizes it, and tags it, so a
+            single search finds it later, even if you never typed a title.
           </p>
 
           <div className="flex items-center gap-5">
@@ -286,7 +281,7 @@ function Home() {
               How it works
             </h2>
             <p className="mj-body text-[#9AA0AE]">
-              Three steps, in order — capture comes first, AI handles the rest.
+              Three steps, in order capture comes first, AI handles the rest.
             </p>
           </div>
 
@@ -350,7 +345,7 @@ function Home() {
           <p className="mj-body text-[#9AA0AE] leading-relaxed">
             Tagging by hand doesn't scale, and you know it the moment you go
             looking for that one video again. Mind Journal does the filing for
-            you, quietly, in the background — so the only thing left to do is
+            you, quietly, in the background so the only thing left to do is
             remember roughly what you saved, and search.
           </p>
         </div>

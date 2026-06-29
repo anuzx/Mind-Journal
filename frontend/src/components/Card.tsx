@@ -104,7 +104,7 @@ export function Card({
   return (
     <div
       className={`
-        relative bg-[#11151D] border rounded-xl p-5 w-72 flex flex-col gap-3
+        relative bg-[#11151D] border rounded-xl p-5 w-full sm:w-72 flex flex-col gap-3
         transition-all duration-200
         ${isCompleted ? "border-white/5 opacity-60" : "border-white/10 hover:border-[#8B7CF6]/40"}
       `}
